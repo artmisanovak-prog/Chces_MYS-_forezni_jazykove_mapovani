@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manuál – Kognitivní mapa případu</title>
+    <style>
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            max-width: 900px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            line-height: 1.7;
+            color: #111;
+            background: #fefefe;
+        }
+        h1, h2, h3 {
+            border-bottom: 2px solid #111;
+            padding-bottom: 0.3rem;
+            margin-top: 2rem;
+        }
+        h1 { font-size: 2.2rem; margin-top: 1rem; }
+        .subtitle { font-size: 1rem; color: #444; margin-bottom: 2rem; font-style: italic; }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid #111;
+            padding: 0.6rem;
+            vertical-align: top;
+        }
+        th {
+            background: #111;
+            color: #fff;
+            font-weight: bold;
+        }
+        .note {
+            background: #f0f0f0;
+            padding: 1rem;
+            border-left: 6px solid #111;
+            margin: 1.5rem 0;
+        }
+        footer {
+            margin-top: 3rem;
+            border-top: 1px solid #ccc;
+            padding-top: 1rem;
+            font-size: 0.9rem;
+            text-align: center;
+            color: #555;
+        }
+    </style>
+</head>
+<body>
+    <h1>📘 Uživatelský manuál</h1>
+    <div class="subtitle">Kognitivní mapa případu – forenzní nástroj pro analýzu výpovědí</div>
+
+    <h2>1. Co je cílem nástroje</h2>
+    <p>Tento nástroj <strong>není detektor lži</strong> ani automatický soudce. Je to <strong>pomocník pro systematickou analýzu jazyka ve výpovědích</strong>. Umožňuje vám:</p>
+    <ul>
+        <li>strukturovaně zaznamenat rámec případu (baseline),</li>
+        <li>vložit výpovědi a nechat si zvýraznit <strong>jazykové signály</strong>,</li>
+        <li>porovnat výpovědi s baseline a vypočítat <strong>permutační skóre</strong>,</li>
+        <li>získat <strong>kognitivní mapu případu</strong> – přehled o shodách, neshodách a slepých místech.</li>
+    </ul>
+    <p>Výsledky <strong>neinterpretuje</strong>, pouze ukazuje jevy. Interpretace je vždy na vás, na vašich znalostech případu a profesní zkušenosti.</p>
+
+    <h2>2. Co znamená permutační skóre</h2>
+    <p>Permutační skóre je <strong>číselné vyjádření míry strukturální odchylky</strong> mezi výpovědí a baseline. Vzniká kombinací:</p>
+    <ul>
+        <li>detekovaných jazykových signálů (každý má svou váhu),</li>
+        <li>neshod s baseline (např. výpověď neobsahuje očekávaný čas, místo, důkaz, motiv).</li>
+    </ul>
+    <p><strong>Jak skóre číst:</strong></p>
+    <ul>
+        <li><strong>0–1,5</strong> → výpověď je v souladu s baseline, málo nebo žádné signály.</li>
+        <li><strong>1,6–3,0</strong> → střední odchylka, vyskytují se jazykové signály, které mohou naznačovat stres, nejistotu nebo snahu něco upravit.</li>
+        <li><strong>3,1 a více</strong> → vysoká odchylka, výpověď se výrazně odchyluje od baseline, objevuje se více signálů najednou (např. změna času + přeskok + prázdná slova). Toto místo si zaslouží zvláštní pozornost.</li>
+    </ul>
+    <div class="note">
+        <strong>Důležité:</strong> Vysoké skóre <strong>neznamená automaticky lež</strong>. Může být způsobeno traumatem, únavou, špatnou pamětí, nebo třeba tím, že baseline není úplná. Je to jen upozornění, že se v jazyce něco děje.
+    </div>
+
+    <h2>3. Jak pracovat s baseline</h2>
+    <p>Baseline je <strong>kotva případu</strong>. Čím přesněji ji vyplníte, tím spolehlivější budou výsledky. Do baseline patří:</p>
+    <ul>
+        <li><strong>Fakta</strong> – co je nesporné (datum, místo, předměty).</li>
+        <li><strong>Časová osa</strong> – očekávané pořadí událostí.</li>
+        <li><strong>Osoby a role</strong> – kdo je oběť, svědek, obviněný.</li>
+        <li><strong>Vztahy</strong> – příbuzenské, pracovní, nepřátelské.</li>
+        <li><strong>Slepá místa</strong> – co se neví, co je třeba zjistit.</li>
+        <li><strong>Hypotézy</strong> – vyšetřovací verze, které se prověřují.</li>
+        <li><strong>Klíčové otázky</strong> – na co je třeba získat odpověď.</li>
+        <li><strong>Místa, důkazy, motivy</strong> – klíčová slova, která očekáváte, že se ve výpovědích objeví.</li>
+    </ul>
+    <p>Baseline můžete průběžně upravovat, jak přibývají informace. Ukládá se do prohlížeče, takže vám zůstane i po zavření stránky.</p>
+
+    <h2>4. Jak číst jazykové signály</h2>
+    <p>Nástroj rozpoznává 12 typů signálů. Jejich výskyt je zvýrazněn barevně v textu a souhrnně v tabulce. Každý signál má svou váhu (0,3–0,9), která se promítá do skóre.</p>
+    
+    <table>
+        <tr><th>Signál</th><th>Váha</th><th>Příklady</th><th>Možný význam (v kontextu)</th></tr>
+        <tr><td>Změna času</td><td>0,7</td><td>včera → teď, bude → byl</td><td>Přechod mezi časovými rovinami může značit trauma, snahu aktualizovat výpověď, nebo ztrátu kontroly.</td></tr>
+        <tr><td>Změna role</td><td>0,6</td><td>já → on, my → oni</td><td>Mluvčí se distancuje, nebo se naopak vžívá do role někoho jiného.</td></tr>
+        <tr><td>Posun tématu</td><td>0,5</td><td>mimochodem, co se týče</td><td>Náhlá změna tématu bez návaznosti – může být únik od nepříjemné otázky.</td></tr>
+        <tr><td>Přeskok</td><td>0,8</td><td>najednou, aniž by</td><td>Vypuštění části děje – záměrné nebo traumatické.</td></tr>
+        <tr><td>Mezera / výpadek</td><td>0,9</td><td>nevím, nepamatuju</td><td>Vědomé nebo nevědomé vynechání informace. Vysoká váha – často klíčové místo.</td></tr>
+        <tr><td>Izolovaný detail</td><td>0,6</td><td>přesně 14:30, konkrétně</td><td>Nepřirozeně přesný detail může být nacvičený, nebo naopak ukazovat na traumatické ulpění.</td></tr>
+        <tr><td>Fixace</td><td>0,5</td><td>pořád, znovu, stále</td><td>Opakování stejného motivu – důležité téma pro mluvčího.</td></tr>
+        <tr><td>Rozpad syntaxe</td><td>0,9</td><td>… -- prostě no</td><td>Nedokončené věty, fragmenty – silný stres, nebo snaha vyhnout se přímé odpovědi.</td></tr>
+        <tr><td>Výplňová slova</td><td>0,3</td><td>jakoby, prostě, vlastně</td><td>Zbytečná slova – mohou značit nejistotu, snahu získat čas.</td></tr>
+        <tr><td>Zmínka o místě (baseline)</td><td>0,5</td><td>(podle klíčových slov)</td><td>Očekávané místo se objevilo, nebo naopak chybí.</td></tr>
+        <tr><td>Zmínka o důkazu (baseline)</td><td>0,6</td><td>(podle klíčových slov)</td><td>Důkaz zmíněn nebo chybí.</td></tr>
+        <tr><td>Zmínka o motivu (baseline)</td><td>0,6</td><td>(podle klíčových slov)</td><td>Motiv zmíněn nebo chybí.</td></tr>
+    </table>
+
+    <div class="note">
+        <strong>Důležité:</strong> Výskyt signálu je jen indikátor, ne důkaz. Vždy ho posuzujte v kontextu celé výpovědi a případu.
+    </div>
+
+    <h2>5. Co nástroj nedělá a nemá dělat</h2>
+    <ul>
+        <li><strong>Nerozhoduje o vině ani nevině.</strong></li>
+        <li><strong>Neříká, zda někdo lže.</strong></li>
+        <li><strong>Nenahrazuje znalecký posudek.</strong></li>
+        <li><strong>Nepracuje s neverbální komunikací (tón hlasu, gesta).</strong></li>
+        <li><strong>Neukládá data na server – vše zůstává jen u vás.</strong></li>
+    </ul>
+
+    <footer>
+        <p>© Michaela — Kognitivní mapa případu. Verze 2.0. | <a href="../README.md">Zpět na hlavní stránku</a></p>
+    </footer>
+</body>
+</html>
