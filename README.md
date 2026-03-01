@@ -17,6 +17,9 @@ Offline nástroj pro strukturovanou analýzu výpovědí. Pomáhá vyšetřovate
 - [Kontakt a podpora](#kontakt-a-podpora)
 
 ---
+- [**Forézní mapování** - funkční nástroj](./doma/forezni_analyzator.html)
+
+---
 
 ## 🧠 Co to je a proč to vzniklo
 
@@ -46,8 +49,10 @@ Nástroj vznikl z potřeby mít **transparentní, offline a bezpečnou pomůcku*
 ## 🚫 Komu nástroj není určen
 
 - **Laické veřejnosti** bez znalosti kontextu trestního řízení.
-- **Jako jediný důkazní prostředek** – výstupy jsou jen pomocné, interpretace vždy na člověku.
-- **K automatizovanému rozhodování** – nástroj nerozhoduje o vině ani nevině, neříká „lže/nepravda“.
+- **Jako důkazní prostředek** – výstupy jsou jen pomocné, interpretace vždy na člověku.
+- **K automatizovanému rozhodování** – nástroj nerozhoduje o vině ani nevině, neříká „lež/pravda“. Jen ukazuje rozpory, shody a slepá místa k prozkoumání.
+**tento nástroj nemá uzavírat, ale naopak otevírat**
+- *nástroj pracuje s jazykem, jako materiálem a s mezerami jako s daty* **nedetekuje významy, interpretace je na uživateli**
 
 ---
 
