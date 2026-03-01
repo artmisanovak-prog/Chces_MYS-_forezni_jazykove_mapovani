@@ -17,7 +17,7 @@ Offline nástroj pro strukturovanou analýzu výpovědí. Pomáhá vyšetřovate
 - [Kontakt a podpora](#kontakt-a-podpora)
 
 ---
-- [**Forézní mapování** - funkční nástroj](./doma/forezni_analyzator.html)
+- [**Forézní mapování** - funkční nástroj](./doma/FOREZNI_ANALYZATOR.html)
 
 ---
 
@@ -101,9 +101,10 @@ Více o filozofii repo domu najdeš v samostatném článku [ZDE](#) (odkaz dopl
    - [Licenční podmínky](./doma/licence.html)
    - [zpětná vazba](./doma/zpetna_vazba.html)
    - [modelové scénáře](./doma/modelove_scenare.html)
+    
 ---
 
-- [**Forézní mapování** - funkční nástroj](./doma/forezni_analyzator.html)
+- [**Forézní mapování** - funkční nástroj](./doma/FOREZNI_ANALYZATOR.html)
 
 ---
 
