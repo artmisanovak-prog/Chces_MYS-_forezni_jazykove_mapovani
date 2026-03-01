@@ -1,0 +1,711 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Kognitivní mapa případu – forenzní analýza výpovědí</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #ffffff;
+            color: #111111;
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+            line-height: 1.6;
+        }
+        h1 { font-size: 2.2rem; margin-bottom: 0.3rem; border-bottom: 3px solid #111; padding-bottom: 0.3rem; }
+        .subtitle { font-size: 1rem; color: #444; margin-bottom: 2rem; font-style: italic; }
+        h2 { font-size: 1.8rem; margin: 2.5rem 0 1rem; border-bottom: 2px solid #111; padding-bottom: 0.3rem; }
+        h3 { font-size: 1.3rem; margin: 1.5rem 0 0.8rem; }
+        .section-desc { color: #444; margin-bottom: 1.2rem; font-size: 0.95rem; }
+
+        /* tlačítka */
+        .btn {
+            background: #111;
+            color: #fff;
+            border: none;
+            padding: 0.6rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            margin: 0.5rem 0.5rem 0.5rem 0;
+            font-family: inherit;
+            border-radius: 2px;
+            transition: background 0.2s;
+        }
+        .btn:hover { background: #333; }
+        .btn-primary { background: #004d40; }
+        .btn-primary:hover { background: #00695c; }
+        .btn-danger { background: #a52222; }
+        .btn-danger:hover { background: #7a1a1a; }
+        .btn-sm { padding: 0.4rem 1rem; font-size: 0.9rem; }
+
+        /* baseline grid */
+        .baseline-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.2rem;
+            margin-bottom: 1rem;
+        }
+        .baseline-block {
+            display: flex;
+            flex-direction: column;
+        }
+        .baseline-block label {
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+        }
+        .baseline-block textarea,
+        .baseline-block input {
+            width: 100%;
+            padding: 0.6rem;
+            border: 1px solid #111;
+            font-family: inherit;
+            font-size: 0.95rem;
+            resize: vertical;
+            background: #fafafa;
+        }
+
+        /* výpovědi */
+        .statement-card {
+            border: 2px solid #111;
+            margin-bottom: 1.5rem;
+            background: #fff;
+        }
+        .statement-header {
+            background: #f0f0f0;
+            padding: 0.8rem 1.2rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-bottom: 1px solid #aaa;
+        }
+        .statement-header:hover { background: #e0e0e0; }
+        .statement-body {
+            padding: 1.2rem;
+            border-top: 1px solid #ddd;
+        }
+        .statement-body label {
+            font-weight: bold;
+            display: block;
+            margin-top: 0.8rem;
+            font-size: 0.95rem;
+        }
+        .statement-body input,
+        .statement-body select,
+        .statement-body textarea {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #111;
+            font-family: inherit;
+            margin-top: 0.2rem;
+            background: #fafafa;
+        }
+        .statement-body textarea { min-height: 180px; }
+        .statement-body .btn { margin-top: 1rem; }
+
+        /* výsledky analýzy */
+        .result-block {
+            border: 2px solid #111;
+            padding: 1.2rem;
+            margin-top: 1.5rem;
+            background: #fafafa;
+        }
+        .signal-tag {
+            display: inline-block;
+            background: #eaeaea;
+            padding: 0.3rem 0.7rem;
+            margin: 0.3rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            border: 1px solid #888;
+        }
+        .signal-strong { background: #ffcdd2; border-color: #b71c1c; }
+        .signal-medium { background: #ffe0b2; border-color: #bf360c; }
+        .signal-weak   { background: #c8e6c9; border-color: #1b5e20; }
+
+        /* kognitivní mapa – tabulka */
+        .map-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            font-size: 0.95rem;
+        }
+        .map-table th,
+        .map-table td {
+            border: 1px solid #111;
+            padding: 0.7rem;
+            text-align: left;
+        }
+        .map-table th {
+            background: #111;
+            color: #fff;
+            font-weight: bold;
+        }
+        .map-high   { background: #ffebee; }
+        .map-medium { background: #fff8e1; }
+        .map-low    { background: #e8f5e9; }
+
+        /* kategorie filtry */
+        .category-filter {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            margin: 1.5rem 0;
+        }
+        .category-btn {
+            background: #e0e0e0;
+            border: 2px solid #111;
+            padding: 0.5rem 1.2rem;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: bold;
+            transition: 0.1s;
+        }
+        .category-btn.active {
+            background: #111;
+            color: #fff;
+            border-color: #111;
+        }
+
+        /* detail kategorie */
+        #categoryDetail {
+            background: #f5f5f5;
+            border: 2px solid #111;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        /* patička */
+        footer {
+            margin-top: 4rem;
+            border-top: 2px solid #ddd;
+            padding-top: 1.5rem;
+            text-align: center;
+            color: #555;
+            font-size: 0.9rem;
+        }
+
+        .print-only { display: none; }
+        @media print {
+            body { background: white; font-size: 12pt; }
+            .btn, .category-filter, #addStatement, #analyzeAll, .statement-header, footer { display: none; }
+            .statement-body { display: block !important; }
+            .print-only { display: block; }
+        }
+    </style>
+</head>
+<body>
+
+<h1>🧠 Kognitivní mapa případu</h1>
+<div class="subtitle">Forenzní analýza výpovědí pomocí jazykových permutací a strukturované baseline</div>
+
+<!-- ========== BASELINE ========== -->
+<section>
+    <h2>📚 1. Baseline případu</h2>
+    <div class="section-desc">Definujte známá fakta, očekávané časové údaje, osoby, vztahy, klíčová slova (místa, důkazy, motivy) a další vodítka. Tento rámec slouží jako referenční kotva pro všechny výpovědi.</div>
+    
+    <div class="baseline-grid">
+        <div class="baseline-block">
+            <label>Základní fakta</label>
+            <textarea id="baselineFacts" placeholder="např. skutek se stal 12.3.2026 v Praze, poškozený Jan Novák..."></textarea>
+        </div>
+        <div class="baseline-block">
+            <label>Časová osa (očekávaná)</label>
+            <textarea id="baselineTimeline" placeholder="Události v očekávaném pořadí..."></textarea>
+        </div>
+        <div class="baseline-block">
+            <label>Osoby a role</label>
+            <textarea id="baselinePersons" placeholder="Jména a role (např. oběť, svědek, obviněný)..."></textarea>
+        </div>
+        <div class="baseline-block">
+            <label>Vztahy mezi osobami</label>
+            <textarea id="baselineRelationships" placeholder="Příbuzenské, pracovní, nepřátelské..."></textarea>
+        </div>
+        <div class="baseline-block">
+            <label>Slepá místa (neznámé)</label>
+            <textarea id="baselineBlindspots" placeholder="Co zatím není jasné, co chybí..."></textarea>
+        </div>
+        <div class="baseline-block">
+            <label>Vyšetřovací verze / hypotézy</label>
+            <textarea id="baselineHypotheses" placeholder="Co se předpokládá, že se mohlo stát..."></textarea>
+        </div>
+        <div class="baseline-block">
+            <label>Klíčové otázky</label>
+            <textarea id="baselineQuestions" placeholder="Na co je třeba získat odpověď..."></textarea>
+        </div>
+        <div class="baseline-block">
+            <label>📍 Místa (klíčová slova)</label>
+            <input type="text" id="baselinePlaces" value="byt, ulice, hospoda, auto" placeholder="např. dům, les, nádraží">
+        </div>
+        <div class="baseline-block">
+            <label>🔍 Důkazy (klíčová slova)</label>
+            <input type="text" id="baselineEvidence" value="nůž, krev, zbraň, SMS" placeholder="např. nůž, krev, zbraň">
+        </div>
+        <div class="baseline-block">
+            <label>🎯 Motivy (klíčová slova)</label>
+            <input type="text" id="baselineMotives" value="peníze, žárlivost, pomsta, strach" placeholder="např. peníze, žárlivost, pomsta">
+        </div>
+    </div>
+
+    <button class="btn" id="saveBaseline">💾 Uložit baseline</button>
+    <button class="btn btn-danger" id="resetBaseline">🗑️ Resetovat baseline</button>
+</section>
+
+<hr>
+
+<!-- ========== VÝPOVĚDI ========== -->
+<section>
+    <h2>🗂️ 2. Výpovědi</h2>
+    <div class="section-desc">Přidávejte jednotlivé výpovědi (svědků, obviněných, poškozených). Každou lze analyzovat samostatně nebo všechny najednou.</div>
+    
+    <button class="btn" id="addStatement">➕ Přidat novou výpověď</button>
+    <button class="btn btn-primary" id="analyzeAll">🧠 Analyzovat všechny výpovědi</button>
+    <button class="btn" id="printMap" onclick="window.print()">🖨️ Vytisknout kognitivní mapu</button>
+
+    <div id="statementsContainer"></div>
+</section>
+
+<hr>
+
+<!-- ========== VÝSLEDKY ========== -->
+<section>
+    <h2>📊 3. Výsledky analýzy</h2>
+    <div id="resultsOutput"></div>
+</section>
+
+<hr>
+
+<!-- ========== KOGNITIVNÍ MAPA ========== -->
+<section>
+    <h2>🧭 4. Kognitivní mapa případu</h2>
+    <div class="section-desc">Souhrn napříč všemi výpověďmi. Barevné zvýraznění podle permutačního skóre. Kliknutím na kategorii zobrazíte detailní nálezy.</div>
+
+    <!-- filtry podle kategorií -->
+    <div class="category-filter" id="categoryFilter">
+        <button class="category-btn active" data-cat="all">🔹 Vše</button>
+        <button class="category-btn" data-cat="time">⏱️ Časové odchylky</button>
+        <button class="category-btn" data-cat="place">📍 Místa</button>
+        <button class="category-btn" data-cat="evidence">🔍 Důkazy</button>
+        <button class="category-btn" data-cat="motive">🎯 Motivy</button>
+        <button class="category-btn" data-cat="language">🗣️ Jazykové signály</button>
+    </div>
+
+    <!-- tabulka mapy -->
+    <div id="caseMapOutput"></div>
+
+    <!-- detail vybrané kategorie -->
+    <div id="categoryDetail">
+        <p><em>Klikněte na některou z kategorií pro zobrazení podrobného přehledu.</em></p>
+    </div>
+</section>
+
+<footer>
+    <p>© Michaela — Kognitivní mapa případu (verze 2.0) | Metoda „Chceš myš?“ | Offline, data pouze v prohlížeči</p>
+</footer>
+
+<script>
+(function() {
+    // -------------------------------------------------------------
+    // 1. DEFINICE JAZYKOVÝCH SIGNÁLŮ (12 typů)
+    // -------------------------------------------------------------
+    const LANGUAGE_SIGNALS = [
+        { id: 'time_shift',      name: 'Změna času',          weight: 0.7, patterns: ['včera', 'dnes', 'zítra', 'teď', 'potom', 'předtím', 'později', 'dříve', 'následně', 'nejdřív', 'pak', 'nakonec'] },
+        { id: 'role_shift',      name: 'Změna role',          weight: 0.6, patterns: ['já', 'on', 'ona', 'my', 'oni', 'vy', 'ty', 'jeho', 'její', 'náš'] }, // zjednodušeně zájmena
+        { id: 'topic_shift',     name: 'Posun tématu',        weight: 0.5, patterns: ['mimochodem', 'ale jinak', 'co se týče', 'jiná věc', 'ostatně', 'kromě toho'] },
+        { id: 'jump',            name: 'Přeskok',             weight: 0.8, patterns: ['najednou', 'aniž by', 'bez varování', 'zčistajasna', 'rázem', 'v tu ránu'] },
+        { id: 'gap',             name: 'Mezera / výpadek',    weight: 0.9, patterns: ['nevím', 'nepamatuju', 'to je složité', 'netuším', 'neprozradím', 'není mi jasné'] },
+        { id: 'isolated_detail', name: 'Izolovaný detail',    weight: 0.6, patterns: ['přesně', 'konkrétně', 'detailně', 'do puntíku', 'naprosto přesně'] },
+        { id: 'fixation',        name: 'Fixace',              weight: 0.5, patterns: ['pořád', 'znovu', 'stále', 'furt', 'zase', 'opakovaně', 'dokola'] },
+        { id: 'syntax_break',    name: 'Rozpad syntaxe',      weight: 0.9, patterns: ['…', '--', 'prostě', 'no', 'ale', 'že', 'takže', 'prostě', 'jakoby'] },
+        { id: 'tempo_change',    name: 'Změna tempa',         weight: 0.4, patterns: [] },  // těžké, bude se detekovat jinak
+        { id: 'sentence_len_change', name: 'Změna délky vět', weight: 0.4, patterns: [] },
+        { id: 'filler_words',    name: 'Výplňová slova',      weight: 0.3, patterns: ['jakoby', 'prostě', 'vlastně', 'no', 'že jo', 'takže', 'prostě', 'jakože', 'viď'] },
+        { id: 'neighbor_shift',  name: 'Změna sousedů',       weight: 0.7, patterns: [] }
+    ];
+
+    // -------------------------------------------------------------
+    // 2. POMOCNÉ FUNKCE – PRÁCE SE STORAGE
+    // -------------------------------------------------------------
+    function getBaseline() {
+        return {
+            facts:         document.getElementById('baselineFacts').value,
+            timeline:      document.getElementById('baselineTimeline').value,
+            persons:       document.getElementById('baselinePersons').value,
+            relationships: document.getElementById('baselineRelationships').value,
+            blindspots:    document.getElementById('baselineBlindspots').value,
+            hypotheses:    document.getElementById('baselineHypotheses').value,
+            questions:     document.getElementById('baselineQuestions').value,
+            places:        document.getElementById('baselinePlaces').value.split(',').map(s => s.trim()).filter(Boolean),
+            evidence:      document.getElementById('baselineEvidence').value.split(',').map(s => s.trim()).filter(Boolean),
+            motives:       document.getElementById('baselineMotives').value.split(',').map(s => s.trim()).filter(Boolean)
+        };
+    }
+
+    function saveBaseline() {
+        const b = getBaseline();
+        localStorage.setItem('forensicBaseline', JSON.stringify(b));
+        alert('Baseline uložena.');
+    }
+
+    function loadBaseline() {
+        const saved = localStorage.getItem('forensicBaseline');
+        if (!saved) return;
+        try {
+            const b = JSON.parse(saved);
+            document.getElementById('baselineFacts').value = b.facts || '';
+            document.getElementById('baselineTimeline').value = b.timeline || '';
+            document.getElementById('baselinePersons').value = b.persons || '';
+            document.getElementById('baselineRelationships').value = b.relationships || '';
+            document.getElementById('baselineBlindspots').value = b.blindspots || '';
+            document.getElementById('baselineHypotheses').value = b.hypotheses || '';
+            document.getElementById('baselineQuestions').value = b.questions || '';
+            document.getElementById('baselinePlaces').value = (b.places || []).join(', ');
+            document.getElementById('baselineEvidence').value = (b.evidence || []).join(', ');
+            document.getElementById('baselineMotives').value = (b.motives || []).join(', ');
+        } catch (e) {}
+    }
+
+    function resetBaseline() {
+        if (confirm('Opravdu smazat všechna data baseline?')) {
+            localStorage.removeItem('forensicBaseline');
+            document.getElementById('baselineFacts').value = '';
+            document.getElementById('baselineTimeline').value = '';
+            document.getElementById('baselinePersons').value = '';
+            document.getElementById('baselineRelationships').value = '';
+            document.getElementById('baselineBlindspots').value = '';
+            document.getElementById('baselineHypotheses').value = '';
+            document.getElementById('baselineQuestions').value = '';
+            document.getElementById('baselinePlaces').value = '';
+            document.getElementById('baselineEvidence').value = '';
+            document.getElementById('baselineMotives').value = '';
+        }
+    }
+
+    // -------------------------------------------------------------
+    // 3. SPRÁVA VÝPOVĚDÍ
+    // -------------------------------------------------------------
+    let statementCounter = 0;
+
+    function saveStatements() {
+        const statements = [];
+        for (let i = 1; i <= statementCounter; i++) {
+            const card = document.getElementById(`statement-${i}`);
+            if (!card) continue;
+            statements.push({
+                id: i,
+                name: document.getElementById(`name-${i}`)?.value || '',
+                role: document.getElementById(`role-${i}`)?.value || 'witness',
+                text: document.getElementById(`text-${i}`)?.value || ''
+            });
+        }
+        localStorage.setItem('forensicStatements', JSON.stringify(statements));
+    }
+
+    function loadStatements() {
+        const saved = localStorage.getItem('forensicStatements');
+        if (!saved) return;
+        try {
+            const list = JSON.parse(saved);
+            list.forEach(s => {
+                addStatementCard(s.id);
+                if (document.getElementById(`name-${s.id}`)) document.getElementById(`name-${s.id}`).value = s.name || '';
+                if (document.getElementById(`role-${s.id}`)) document.getElementById(`role-${s.id}`).value = s.role || 'witness';
+                if (document.getElementById(`text-${s.id}`)) document.getElementById(`text-${s.id}`).value = s.text || '';
+            });
+            if (list.length) statementCounter = Math.max(...list.map(s => s.id));
+        } catch (e) {}
+    }
+
+    function addStatementCard(id = null) {
+        if (id === null) {
+            statementCounter++;
+            id = statementCounter;
+        } else {
+            if (id > statementCounter) statementCounter = id;
+        }
+        const container = document.getElementById('statementsContainer');
+        const card = document.createElement('div');
+        card.className = 'statement-card';
+        card.id = `statement-${id}`;
+        card.innerHTML = `
+            <div class="statement-header" onclick="toggleStatement(${id})">
+                <span>Výpověď #${id}</span>
+                <span id="arrow-${id}">▼</span>
+            </div>
+            <div class="statement-body" id="body-${id}" style="display:block;">
+                <label>Jméno / označení osoby</label>
+                <input type="text" id="name-${id}" placeholder="např. Svědek A, Obviněný B" value="Osoba ${id}">
+                <label>Role</label>
+                <select id="role-${id}">
+                    <option value="witness">Svědek</option>
+                    <option value="suspect">Obviněný</option>
+                    <option value="victim">Poškozený</option>
+                    <option value="other">Jiná</option>
+                </select>
+                <label>Text výpovědi</label>
+                <textarea id="text-${id}" placeholder="Celý text výpovědi (lze vložit i delší odstavec)"></textarea>
+                <button class="btn btn-sm" onclick="analyzeSingle(${id})">🔍 Analyzovat tuto výpověď</button>
+                <div id="result-${id}" class="result-block" style="display:none;"></div>
+            </div>
+        `;
+        container.appendChild(card);
+        saveStatements();
+    }
+
+    window.toggleStatement = function(id) {
+        const body = document.getElementById(`body-${id}`);
+        const arrow = document.getElementById(`arrow-${id}`);
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            arrow.textContent = '▼';
+        } else {
+            body.style.display = 'none';
+            arrow.textContent = '►';
+        }
+    };
+
+    // -------------------------------------------------------------
+    // 4. DETEKCE A ANALÝZA
+    // -------------------------------------------------------------
+    function detectSignalsInText(text, baseline) {
+        const found = [];
+        const lower = text.toLowerCase();
+
+        // jazykové signály podle klíčových slov
+        LANGUAGE_SIGNALS.forEach(sig => {
+            if (sig.patterns.length === 0) return; // složité signály zatím ignorujeme
+            for (let pat of sig.patterns) {
+                if (lower.includes(pat.toLowerCase())) {
+                    found.push({ id: sig.id, name: sig.name, weight: sig.weight });
+                    break; // jeden výskyt stačí k označení signálu
+                }
+            }
+        });
+
+        // detekce míst/důkazů/motivů z baseline
+        if (baseline.places.some(p => lower.includes(p.toLowerCase()))) {
+            found.push({ id: 'place_mention', name: 'Zmínka o místě (baseline)', weight: 0.5 });
+        }
+        if (baseline.evidence.some(e => lower.includes(e.toLowerCase()))) {
+            found.push({ id: 'evidence_mention', name: 'Zmínka o důkazu (baseline)', weight: 0.6 });
+        }
+        if (baseline.motives.some(m => lower.includes(m.toLowerCase()))) {
+            found.push({ id: 'motive_mention', name: 'Zmínka o motivu (baseline)', weight: 0.6 });
+        }
+
+        // unikátní signály (bez duplicit)
+        return Array.from(new Map(found.map(f => [f.id, f])).values());
+    }
+
+    function compareWithBaseline(segment, baseline) {
+        const lower = segment.toLowerCase();
+        return {
+            time_match:    LANGUAGE_SIGNALS.find(s => s.id === 'time_shift')?.patterns.some(p => lower.includes(p)) || false,
+            role_match:    LANGUAGE_SIGNALS.find(s => s.id === 'role_shift')?.patterns.some(p => lower.includes(p)) || false,
+            place_match:   baseline.places.some(p => lower.includes(p.toLowerCase())),
+            evidence_match: baseline.evidence.some(e => lower.includes(e.toLowerCase())),
+            motive_match:  baseline.motives.some(m => lower.includes(m.toLowerCase()))
+        };
+    }
+
+    function computePermutationScore(signals, baselineMatch) {
+        let score = 0;
+        signals.forEach(s => score += s.weight || 0.3);
+        if (!baselineMatch.time_match) score += 0.5;
+        if (!baselineMatch.role_match) score += 0.5;
+        if (!baselineMatch.place_match) score += 0.4;
+        if (!baselineMatch.evidence_match) score += 0.4;
+        if (!baselineMatch.motive_match) score += 0.4;
+        return Math.round(score * 100) / 100;
+    }
+
+    function analyzeStatement(text, baseline, personName, role) {
+        const sentences = text.split(/(?<=[.!?])\s+/).filter(s => s.trim().length > 0);
+        const allSignals = [];
+        const segments = [];
+        let totalScore = 0;
+
+        sentences.forEach(sent => {
+            const signals = detectSignalsInText(sent, baseline);
+            const baselineMatch = compareWithBaseline(sent, baseline);
+            const score = computePermutationScore(signals, baselineMatch);
+            totalScore += score;
+            allSignals.push(...signals);
+            segments.push({ text: sent, signals, baselineMatch, score });
+        });
+
+        // unikátní signály pro přehled
+        const uniqueSignals = Array.from(new Map(allSignals.map(s => [s.id, s])).values());
+
+        return {
+            person,
+            role,
+            totalScore,
+            segments,
+            signals: uniqueSignals,
+            rawSignals: allSignals
+        };
+    }
+
+    // -------------------------------------------------------------
+    // 5. ZOBRAZENÍ VÝSLEDKŮ
+    // -------------------------------------------------------------
+    window.analyzeSingle = function(id) {
+        const text = document.getElementById(`text-${id}`)?.value || '';
+        if (!text.trim()) { alert('Prázdná výpověď.'); return; }
+        const name = document.getElementById(`name-${id}`)?.value || `Osoba ${id}`;
+        const role = document.getElementById(`role-${id}`)?.value || 'witness';
+        const baseline = getBaseline();
+
+        const result = analyzeStatement(text, baseline, name, role);
+
+        const box = document.getElementById(`result-${id}`);
+        box.style.display = 'block';
+
+        let signalsHtml = result.signals.map(s => {
+            let cls = 'signal-tag';
+            if (s.weight >= 0.7) cls += ' signal-strong';
+            else if (s.weight >= 0.4) cls += ' signal-medium';
+            else cls += ' signal-weak';
+            return `<span class="${cls}">${s.name}</span>`;
+        }).join('');
+
+        box.innerHTML = `
+            <h4>Výsledek analýzy – ${result.person} (${result.role})</h4>
+            <p><strong>Permutační skóre:</strong> ${result.totalScore.toFixed(2)}</p>
+            <p><strong>Detekované signály:</strong> ${signalsHtml || 'žádné'}</p>
+        `;
+        saveStatements();
+    };
+
+    window.analyzeAll = function() {
+        const baseline = getBaseline();
+        const statements = [];
+        for (let i = 1; i <= statementCounter; i++) {
+            const name = document.getElementById(`name-${i}`)?.value;
+            const role = document.getElementById(`role-${i}`)?.value;
+            const text = document.getElementById(`text-${i}`)?.value;
+            if (text && text.trim()) {
+                statements.push({ id: i, name, role, text });
+            }
+        }
+        if (statements.length === 0) { alert('Žádné výpovědi k analýze.'); return; }
+
+        const results = statements.map(s => analyzeStatement(s.text, baseline, s.name || `Osoba ${s.id}`, s.role || 'witness'));
+
+        // zobrazení v sekci výsledky
+        const out = document.getElementById('resultsOutput');
+        out.innerHTML = results.map(r => `
+            <div class="result-block">
+                <h3>${r.person} (${r.role})</h3>
+                <p><strong>Permutační skóre:</strong> ${r.totalScore.toFixed(2)}</p>
+                <p><strong>Signály:</strong> ${r.signals.map(s => `<span class="signal-tag">${s.name}</span>`).join(' ') || 'žádné'}</p>
+            </div>
+        `).join('');
+
+        // uložit do window pro filtry
+        window.lastResults = results;
+        buildCaseMap(results);
+    };
+
+    function buildCaseMap(results) {
+        const mapDiv = document.getElementById('caseMapOutput');
+        let rows = '';
+        results.forEach(r => {
+            let cls = 'map-low';
+            if (r.totalScore > 3.0) cls = 'map-high';
+            else if (r.totalScore > 1.5) cls = 'map-medium';
+            rows += `<tr class="${cls}">
+                <td>${r.person}</td>
+                <td>${r.role}</td>
+                <td>${r.totalScore.toFixed(2)}</td>
+                <td>${r.signals.length}</td>
+            </tr>`;
+        });
+        mapDiv.innerHTML = `
+            <table class="map-table">
+                <tr><th>Osoba</th><th>Role</th><th>Skóre</th><th>Počet signálů</th></tr>
+                ${rows}
+            </table>
+        `;
+    }
+
+    // -------------------------------------------------------------
+    // 6. FILTROVÁNÍ PODLE KATEGORIÍ
+    // -------------------------------------------------------------
+    window.filterCategory = function(cat) {
+        // aktivní tlačítko
+        document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelector(`.category-btn[data-cat="${cat}"]`).classList.add('active');
+
+        const detailDiv = document.getElementById('categoryDetail');
+        if (!window.lastResults || window.lastResults.length === 0) {
+            detailDiv.innerHTML = '<p><em>Nejprve proveďte analýzu všech výpovědí (tlačítko nahoře).</em></p>';
+            return;
+        }
+
+        if (cat === 'all') {
+            detailDiv.innerHTML = '<p><em>Vyberte konkrétní kategorii pro detailní nálezy.</em></p>';
+            return;
+        }
+
+        let output = '';
+        window.lastResults.forEach(r => {
+            let relevantSignals = [];
+            if (cat === 'time') relevantSignals = r.rawSignals.filter(s => s.id === 'time_shift');
+            else if (cat === 'place') relevantSignals = r.rawSignals.filter(s => s.id === 'place_mention');
+            else if (cat === 'evidence') relevantSignals = r.rawSignals.filter(s => s.id === 'evidence_mention');
+            else if (cat === 'motive') relevantSignals = r.rawSignals.filter(s => s.id === 'motive_mention');
+            else if (cat === 'language') relevantSignals = r.rawSignals.filter(s => !['place_mention','evidence_mention','motive_mention'].includes(s.id));
+
+            if (relevantSignals.length > 0) {
+                output += `<h4>${r.person} (${r.role})</h4><ul>`;
+                relevantSignals.forEach(s => output += `<li>${s.name} (váha ${s.weight})</li>`);
+                output += '</ul>';
+            }
+        });
+
+        if (!output) output = '<p>Žádné nálezy v této kategorii.</p>';
+        detailDiv.innerHTML = output;
+    };
+
+    // -------------------------------------------------------------
+    // 7. INICIALIZACE A UDÁLOSTI
+    // -------------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+        loadBaseline();
+        loadStatements();
+
+        document.getElementById('saveBaseline').addEventListener('click', saveBaseline);
+        document.getElementById('resetBaseline').addEventListener('click', resetBaseline);
+        document.getElementById('addStatement').addEventListener('click', () => addStatementCard());
+        document.getElementById('analyzeAll').addEventListener('click', window.analyzeAll);
+
+        // filtry
+        document.querySelectorAll('.category-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const cat = e.target.dataset.cat;
+                window.filterCategory(cat);
+            });
+        });
+
+        // automatické ukládání výpovědí při změně
+        document.addEventListener('input', (e) => {
+            if (e.target.id && (e.target.id.startsWith('name-') || e.target.id.startsWith('role-') || e.target.id.startsWith('text-'))) {
+                saveStatements();
+            }
+        });
+    });
+
+})();
+</script>
+</body>
+</html>
