@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelové scénáře a výpočty návratnosti – Kognitivní mapa případu</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: 'Georgia', 'Times New Roman', serif;
+            background: #fefefe;
+            color: #111;
+            max-width: 1000px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+            line-height: 1.7;
+        }
+        h1 { font-size: 2.2rem; border-bottom: 3px solid #111; padding-bottom: 0.3rem; margin-bottom: 1.5rem; }
+        h2 { font-size: 1.8rem; margin: 2.5rem 0 1rem; border-bottom: 2px solid #111; padding-bottom: 0.3rem; }
+        h3 { font-size: 1.4rem; margin: 1.8rem 0 0.8rem; }
+        .scenario {
+            background: #f5f5f5;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            border-left: 6px solid #111;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+        th, td {
+            border: 1px solid #111;
+            padding: 0.8rem;
+            text-align: left;
+        }
+        th {
+            background: #111;
+            color: #fff;
+            font-weight: bold;
+        }
+        .vysledek {
+            background: #e8f5e9;
+            padding: 1rem;
+            border-left: 6px solid #2e7d32;
+            margin: 1rem 0;
+            font-weight: bold;
+        }
+        footer {
+            margin-top: 3rem;
+            border-top: 1px solid #ccc;
+            padding-top: 1rem;
+            text-align: center;
+            color: #555;
+        }
+        a { color: #111; text-decoration: none; border-bottom: 1px dotted #111; }
+        a:hover { border-bottom: 1px solid #111; }
+    </style>
+</head>
+<body>
+    <h1>📊 Modelové scénáře a výpočty návratnosti</h1>
+    <p>Konkrétní příklady použití nástroje a propočet, jak rychle se investice vrátí.</p>
+
+    <h2>🎯 Modelové scénáře</h2>
+
+    <div class="scenario">
+        <h3>1. Advokát připravující obhajobu</h3>
+        <p><strong>Situace:</strong> Advokát dostane spis s výpovědí svědka, která se zdá být v pořádku, ale něco v něm nesedí.</p>
+        <p><strong>Použití nástroje:</strong> Vloží text do analyzátoru, nastaví baseline podle známých fakt (čas, místo, motivy). Nástroj mu zvýrazní opakující se fráze, přeskoky a prázdná slova.</p>
+        <p><strong>Výstup:</strong> Advokát zjistí, že svědek třikrát zopakoval stejnou větu v různých kontextech – to může znamenat naučenou výpověď. Získá argument pro křížový výslech.</p>
+        <p><strong>Hodnota:</strong> Ušetří 5–8 hodin pracné analýzy a zvýší šanci na úspěch.</p>
+    </div>
+
+    <div class="scenario">
+        <h3>2. Policejní vyšetřovatel analyzující více výpovědí</h3>
+        <p><strong>Situace:</strong> Tři svědci vypovídají k téže události, jejich výpovědi se liší v detailech.</p>
+        <p><strong>Použití nástroje:</strong> Vyšetřovatel zadá baseline (známá fakta) a vloží všechny tři výpovědi. Kognitivní mapa ukáže, kde se shodují, kde se rozcházejí a kde jsou slepá místa.</p>
+        <p><strong>Výstup:</strong> Na první pohled vidí, že dva svědci mají stejný časový posun, třetí je konzistentní. To mu pomůže zaměřit další výslech.</p>
+        <p><strong>Hodnota:</strong> Zkrátí analýzu z několika dnů na hodiny, získá objektivní podklad pro další postup.</p>
+    </div>
+
+    <div class="scenario">
+        <h3>3. Soudce posuzující věrohodnost výpovědí</h3>
+        <p><strong>Situace:</strong> Soudce má před sebou spis s rozpornými výpověďmi a potřebuje si udělat strukturovaný přehled.</p>
+        <p><strong>Použití nástroje:</strong> Nechá si vygenerovat kognitivní mapu případu, kde vidí barevně odlišené odchylky každé výpovědi od baseline.</p>
+        <p><strong>Výstup:</strong> Okamžitě vidí, která výpověď je nejvíce v rozporu s fakty, kde jsou opakující se vzorce a kde naopak shoda.</p>
+        <p><strong>Hodnota:</strong> Zkvalitní a zrychlí rozhodování, sníží riziko justičního omylu.</p>
+    </div>
+
+    <div class="scenario">
+        <h3>4. Katedra právní fakulty při výuce</h3>
+        <p><strong>Situace:</strong> Studenti dostanou za úkol analyzovat fiktivní případ a posoudit věrohodnost výpovědí.</p>
+        <p><strong>Použití nástroje:</strong> Každý student si může nástroj stáhnout a použít na text. Výsledky pak porovnávají a diskutují, proč nástroj označil právě tato místa.</p>
+        <p><strong>Výstup:</strong> Studenti se učí systematické analýze, rozvíjejí kritické myšlení.</p>
+        <p><strong>Hodnota:</strong> Kvalitnější výuka, propojení teorie s praxí.</p>
+    </div>
+
+    <h2>💰 Výpočty návratnosti investice</h2>
+
+    <h3>Pro advokáta (jednotlivec) – cena 130 000 Kč</h3>
+    <table>
+        <tr><th>Položka</th><th>Hodnota</th></tr>
+        <tr><td>Průměrná hodinová sazba advokáta</td><td>3 000 – 5 000 Kč/hod</td></tr>
+        <tr><td>Ušetřený čas na jeden střední případ</td><td>10 – 15 hodin</td></tr>
+        <tr><td>Finanční úspora na jeden případ</td><td>30 000 – 75 000 Kč</td></tr>
+        <tr><td>Počet případů za rok, kde nástroj využije</td><td>10 – 20</td></tr>
+        <tr><td>Roční úspora celkem</td><td>300 000 – 1 500 000 Kč</td></tr>
+    </table>
+    <div class="vysledek">
+        ⚡ Návratnost investice: <strong>1 – 5 měsíců</strong>
+    </div>
+
+    <h3>Pro organizaci (např. advokátní kancelář o 5 lidech) – cena 300 000 Kč</h3>
+    <table>
+        <tr><th>Položka</th><th>Hodnota</th></tr>
+        <tr><td>Průměrná hodinová sazba</td><td>3 500 Kč/hod (průměr)</td></tr>
+        <tr><td>Ušetřený čas na jednoho právníka za rok</td><td>100 hodin</td></tr>
+        <tr><td>Úspora na jednoho právníka</td><td>350 000 Kč</td></tr>
+        <tr><td>Počet právníků v kanceláři</td><td>5</td></tr>
+        <tr><td>Roční úspora celkem</td><td>1 750 000 Kč</td></tr>
+    </table>
+    <div class="vysledek">
+        ⚡ Návratnost investice: <strong>2 měsíce</strong>
+    </div>
+
+    <h3>Pro instituci (soud, policie, fakulta) – cena 300 000 Kč</h3>
+    <table>
+        <tr><th>Položka</th><th>Hodnota</th></tr>
+        <tr><td>Počet uživatelů</td><td>20 – 50</td></tr>
+        <tr><td>Ušetřený čas na uživatele za rok</td><td>50 hodin</td></tr>
+        <tr><td>Celková roční úspora času</td><td>1 000 – 2 500 hodin</td></tr>
+        <tr><td>Hodnota ušetřeného času (přepočtená)</td><td>3 000 000 – 7 500 000 Kč</td></tr>
+    </table>
+    <div class="vysledek">
+        ⚡ Návratnost investice: <strong>1 – 2 měsíce</strong> (a to nepočítáme zvýšení kvality rozhodování a prevenci justičních omylů)
+    </div>
+
+    <h3>Pro studenta (jednotlivec) – cena 130 000 Kč</h3>
+    <p>Nástroj není primárně určen pro studenty, ale pokud si ho student koupí, platí stejnou cenu jako advokát. Školám a fakultám doporučujeme zakoupit <strong>institucionální licenci za 300 000 Kč</strong>, kterou pak může využívat celá katedra.</p>
+
+    <footer>
+        <p>© Michaela — Kognitivní mapa případu. Verze 2.0. | <a href="../README.md">Zpět na hlavní stránku</a></p>
+    </footer>
+</body>
+</html>
