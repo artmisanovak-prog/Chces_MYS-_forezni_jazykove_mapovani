@@ -102,6 +102,54 @@ Více o filozofii repo domu najdeš v samostatném článku [ZDE](#) (odkaz dopl
 
 ---
 
+# 🏠 Metoda "Repo dům" – jak jsem si vzala svobodu dělat věci po svém
+
+Tohle není web. Je to **repozitář** – místo, kde žije celý systém "Chceš myš?" jako soubory, které si můžeš stáhnout, otevřít, upravit, vlastnit.
+
+Proč jsem to udělala takhle?
+**Protože jsem tvůrce, ne vývojářka.**
+
+### Co je "Repo dům"?
+
+Vymyslela jsem způsob, jak dělat věci **po svém** – 
+bez závislosti, bez kompromisů, bez dovolení.
+
+**"Chceš myš?" je první projekt postavený tímhle způsobem.**
+
+---
+
+## 🏠 Princip „repo domů“: Váš systém, vaše data, váš klid
+
+Všechny karty, nástroje a mody, které si u nás pořídíte, **nejsou webová aplikace, ke které byste měli jen dočasný přístup**. Je to **váš vlastní digitální dům** – repozitář, který si stáhnete a spravujete **sami u sebe**.
+
+### Co to pro vás znamená?
+
+- 🔐 **Vaše data zůstávají vaše.** Nikam se neodesílají, neukládají se na naše servery, nikdo jiný k nim nemá přístup. Vy máte plnou kontrolu.
+- 🏠 **Máte to u sebe.** Celý systém (všechny HTML nástroje, texty, obrázky) je fyzicky u vás – na vašem disku, na vašem serveru, ve vašem GitHub repozitáři.
+- 🛠️ **Můžete si to přizpůsobit.** Každý soubor si můžete otevřít, upravit, přepsat, přidat vlastní nápady. Systém se stává vaším, ne naším.
+- 🧩 **Funguje to i bez internetu.** Jakmile si to stáhnete, můžete vše používat offline. Skvělé pro interní workshopy nebo pro firmy s přísnými bezpečnostními pravidly.
+- 💎 **Je to transparentní.** Vidíte přesně, jak je který nástroj postavený, jaká data používá, jak funguje. Žádná černá skříňka.
+
+### Proč je to dneska důležité?
+
+Firmy už nechtějí posílat svá interní data do cizích cloudů, nechtějí být závislé na dodavateli, který jim může ze dne na den změnit cenu nebo vypnout přístup. Chtějí **vlastnictví, kontrolu a bezpečí**.
+
+Tento princip (říkáme mu **„repo dům“**) dává tyto jistoty. Platíte si jednou za chytrý nástroj, který vám zůstane navždy, ne za přístup na rok.
+
+**Je to nová cesta, jak stavět digitální nástroje – bez webu, bez závislostí, s plnou mocí ve vašich rukou.**
+
+---
+
+### Chceš vědět víc?
+
+Metodu **nevyučuji** ani **neprodávám** (zatím).  
+Ale pokud tě zajímá filozofie nebo chceš diskutovat:
+
+📧 **chcesmys@gmail.com**  
+📌 Do předmětu napiš: **REPO DŮM**
+
+---
+
 ## 📚 Dokumentace a podmínky
 
 - [Uživatelský manuál – podrobný návod](./doma/manual.html)
