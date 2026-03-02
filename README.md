@@ -17,7 +17,10 @@ Offline nástroj pro strukturovanou analýzu výpovědí. Pomáhá vyšetřovate
 - [Kontakt a podpora](#kontakt-a-podpora)
 
 ---
+
 - [**Forézní mapování** - funkční nástroj](./doma/FOREZNI_ANALYZATOR.html)
+- [jazykový **analyzér** textu](doma/analyzer.html)
+- [jazykový **porovnávač** textu](doma/porovnavac.html)
 
 ---
 
