@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐁 Analyzátor jazykových poruch</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:#fff;color:#111;max-width:800px;margin:0 auto;padding:2rem 1rem;line-height:1.6}
+h1{font-size:1.5rem;margin-bottom:.2rem}
+.sub{color:#888;font-size:.85rem;margin-bottom:1.5rem}
+textarea{width:100%;padding:.5rem;border:1px solid #ccc;font-family:Georgia,serif;font-size:.9rem;resize:vertical;min-height:200px;margin-bottom:1rem}
+.btn{padding:.5rem 1.2rem;background:#111;color:#fff;border:none;cursor:pointer;font-size:.9rem;font-family:Georgia,serif}
+.btn:hover{background:#333}
+.btn-outline{background:#fff;color:#111;border:1px solid #111}
+.row{display:flex;gap:.5rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.highlighted{width:100%;padding:.5rem;border:1px solid #ccc;font-size:.9rem;min-height:200px;background:#fafafa;line-height:2;white-space:pre-wrap;display:none}
+.legend{display:flex;flex-wrap:wrap;gap:.3rem;margin:1rem 0}
+.legend-item{font-size:.75rem;padding:.2rem .5rem;border-radius:3px;cursor:help}
+.results{margin-top:2rem;border-top:2px solid #111;padding-top:1rem}
+.results h2{font-size:1rem;margin-bottom:.5rem}
+.profile-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.5rem;margin-top:.5rem}
+.profile-item{padding:.4rem .6rem;background:#f5f5f5;border-radius:3px;font-size:.8rem}
+.profile-item strong{display:block;font-size:.7rem;color:#555}
+</style>
+</head>
+<body>
+
+<h1>🐁 Analyzátor jazykových poruch</h1>
+<div class="sub">Detekce 12 typů strukturálních odchylek v textu</div>
+
+<textarea id="input-text" placeholder="Vložte text (e-mail, chat, přepis rozhovoru, deník…)"></textarea>
+
+<div class="row">
+  <button class="btn" onclick="analyze()">🔍 Analyzovat</button>
+  <button class="btn btn-outline" onclick="resetText()">✕ Smazat</button>
+  <button class="btn btn-outline" onclick="switchView()" id="toggle-btn">🔎 Zobrazit zvýrazněný text</button>
+</div>
+
+<div class="highlighted" id="highlighted"></div>
+
+<div class="legend" id="legend"></div>
+
+<div class="results" id="results" style="display:none">
+  <h2>📊 Profil textu</h2>
+  <div class="profile-grid" id="profile"></div>
+  <p style="font-size:.75rem;color:#888;margin-top:1rem">Detekce je založena na klíčových slovech a jednoduchých vzorcích. Neslouží jako důkaz, jen jako pomůcka.</p>
+</div>
+
+<script>
+const PORUCHY = [
+  {id:'mezera',  label:'Mezera / výpadek',      color:'#ffcdd2', textColor:'#900',
+   patterns:['nevím','nepamatuju','nepamatuji','nemohu říct','nemůžu říct','netuším','to je složité','si nejsem jist','neprozradím','nechci mluvit','raději nebudu','to nevím']},
+  {id:'preskok', label:'Přeskok',               color:'#ffe0b2', textColor:'#c06000',
+   patterns:['najednou','aniž by','bez varování','zčistajasna','rázem','v tu ránu','hned nato','a pak hned']},
+  {id:'cas',     label:'Změna času',            color:'#fff9c4', textColor:'#8a7000',
+   patterns:['včera','dnes','zítra','teď','potom','předtím','později','dříve','následně','nejdřív','nakonec','mezitím']},
+  {id:'tema',    label:'Posun tématu',           color:'#bbdefb', textColor:'#0d3a7a',
+   patterns:['mimochodem','ale jinak','co se týče','jiná věc','ostatně','kromě toho','a ještě','a vlastně']},
+  {id:'detail',  label:'Izolovaný detail',      color:'#f8bbd0', textColor:'#880040',
+   patterns:['přesně v','konkrétně','do puntíku','naprosto přesně','přesně takhle','přesně tehdy']},
+  {id:'syntax',  label:'Rozpad syntaxe',        color:'#d7ccc8', textColor:'#3e2723',
+   patterns:['…','--','prostě no','ale no','takže prostě','a prostě']},
+  {id:'vypln',   label:'Výplňová slova',        color:'#b2dfdb', textColor:'#00363a',
+   patterns:['jakože','vlastně','no tak','víš co','chci říct','to znamená','jednoduše řečeno','dalo by se říct']}
+];
+
+let markedText = '';
+
+function analyze() {
+  const text = document.getElementById('input-text').value;
+  if (!text.trim()) { alert('Vložte text'); return; }
+  
+  const sentences = text.split(/(?<=[.!?…])\s+/).filter(s => s.trim().length > 3);
+  const allWords = text.toLowerCase().split(/\s+/);
+  const wordCount = {};
+  allWords.forEach(w => { if (w.length > 4) wordCount[w] = (wordCount[w]||0)+1; });
+  
+  const foundIds = new Set();
+  let workingText = text;
+  
+  // Keyword-based
+  PORUCHY.forEach(p => {
+    if (!p.patterns.length) return;
+    p.patterns.forEach(pat => {
+      const re = new RegExp(escapeReg(pat), 'gi');
+      if (re.test(workingText)) {
+        foundIds.add(p.id);
+        workingText = workingText.replace(re, m =>
+          `<span class="d-${p.id}" style="background:${p.color};color:${p.textColor};border-radius:2px">${m}</span>`
+        );
+      }
+    });
+  });
+  
+  // Fixace (opakovaná slova)
+  Object.entries(wordCount).forEach(([w, cnt]) => {
+    if (cnt >= 3) {
+      foundIds.add('fixace');
+      const re = new RegExp(`\\b${escapeReg(w)}\\b`, 'gi');
+      workingText = workingText.replace(re, m =>
+        `<span style="background:#e1bee7;color:#4a1060;border-radius:2px" title="Fixace: '${w}' se opakuje ${cnt}×">${m}</span>`
+      );
+    }
+  });
+  
+  // Změna délky vět (jednoduchá)
+  if (sentences.length >= 3) {
+    const lens = sentences.map(s => s.split(/\s+/).length);
+    const avg = lens.reduce((a,b)=>a+b,0)/lens.length;
+    const std = Math.sqrt(lens.map(l => (l-avg)**2).reduce((a,b)=>a+b,0)/lens.length);
+    if (std > 3) {
+      foundIds.add('delka');
+      foundIds.add('tempo');
+    }
+  }
+  
+  // Přidáme fixaci do seznamu, pokud nebyla
+  if (foundIds.has('fixace') && !PORUCHY.find(p=>p.id==='fixace')) {
+    PORUCHY.push({id:'fixace', label:'Fixace / opakování', color:'#e1bee7', textColor:'#4a1060'});
+  }
+  if (foundIds.has('delka') && !PORUCHY.find(p=>p.id==='delka')) {
+    PORUCHY.push({id:'delka', label:'Změna délky vět', color:'#f0f4c3', textColor:'#524500'});
+  }
+  if (foundIds.has('tempo') && !PORUCHY.find(p=>p.id==='tempo')) {
+    PORUCHY.push({id:'tempo', label:'Změna tempa', color:'#c5cae9', textColor:'#1a237e'});
+  }
+  
+  markedText = workingText;
+  document.getElementById('highlighted').innerHTML = markedText;
+  
+  // Legenda
+  const found = PORUCHY.filter(p => foundIds.has(p.id));
+  const legEl = document.getElementById('legend');
+  legEl.innerHTML = found.map(p => 
+    `<span class="legend-item" style="background:${p.color};color:${p.textColor}">${p.label}</span>`
+  ).join('');
+  
+  // Profil
+  const totalWords = allWords.length;
+  const profileEl = document.getElementById('profile');
+  profileEl.innerHTML = found.map(p => {
+    const count = (markedText.match(new RegExp(`d-${p.id}`, 'g')) || []).length;
+    const percent = Math.round((count / totalWords) * 100) || 0;
+    return `<div class="profile-item" style="border-left:3px solid ${p.color}">
+      <strong>${p.label}</strong> ${count}× (${percent}%)
+    </div>`;
+  }).join('');
+  
+  document.getElementById('results').style.display = 'block';
+  document.getElementById('toggle-btn').style.display = 'inline-block';
+}
+
+function switchView() {
+  const input = document.getElementById('input-text');
+  const hl = document.getElementById('highlighted');
+  const btn = document.getElementById('toggle-btn');
+  if (hl.style.display === 'none' || hl.style.display === '') {
+    hl.style.display = 'block';
+    input.style.display = 'none';
+    btn.textContent = '✏ Zpět na text';
+  } else {
+    hl.style.display = 'none';
+    input.style.display = '';
+    btn.textContent = '🔎 Zobrazit zvýrazněný text';
+  }
+}
+
+function resetText() {
+  document.getElementById('input-text').value = '';
+  document.getElementById('highlighted').innerHTML = '';
+  document.getElementById('legend').innerHTML = '';
+  document.getElementById('results').style.display = 'none';
+  document.getElementById('toggle-btn').style.display = 'none';
+  document.getElementById('highlighted').style.display = 'none';
+  document.getElementById('input-text').style.display = '';
+}
+
+function escapeReg(s) { return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+</script>
+</body>
+</html>
