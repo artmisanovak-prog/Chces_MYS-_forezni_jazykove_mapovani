@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐁 Porovnávač textů</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Georgia,serif;background:#fff;color:#111;max-width:900px;margin:0 auto;padding:2rem 1rem;line-height:1.6}
+h1{font-size:1.5rem;margin-bottom:.2rem}
+.sub{color:#888;font-size:.85rem;margin-bottom:1.5rem}
+.flex{display:flex;gap:1rem;flex-wrap:wrap}
+.flex-item{flex:1 1 300px}
+textarea{width:100%;padding:.5rem;border:1px solid #ccc;font-family:Georgia,serif;font-size:.9rem;resize:vertical;min-height:250px}
+.btn{padding:.5rem 1.2rem;background:#111;color:#fff;border:none;cursor:pointer;font-size:.9rem;font-family:Georgia,serif;margin:1rem 0}
+.btn:hover{background:#333}
+.btn-outline{background:#fff;color:#111;border:1px solid #111}
+.results{margin-top:2rem;border-top:2px solid #111;padding-top:1rem}
+table{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:.5rem}
+th,td{border:1px solid #ccc;padding:.4rem .6rem;text-align:left}
+th{background:#111;color:#fff}
+.diff{background:#ffe0b2}
+.same{background:#f0f4c3}
+.stat-row{display:flex;gap:2rem;flex-wrap:wrap;margin:.5rem 0}
+.stat-item{padding:.5rem;background:#f5f5f5;border-radius:3px}
+</style>
+</head>
+<body>
+
+<h1>🐁 Porovnávač textů</h1>
+<div class="sub">Porovnání dvou textů – shody, rozdíly, strukturální změny</div>
+
+<div class="flex">
+  <div class="flex-item">
+    <label><strong>Text A (baseline / běžný text)</strong></label>
+    <textarea id="text-a" placeholder="Vložte první text (např. e-maily, deník, starší výpověď)"></textarea>
+  </div>
+  <div class="flex-item">
+    <label><strong>Text B (srovnávaný text)</strong></label>
+    <textarea id="text-b" placeholder="Vložte druhý text (např. výpověď v případu)"></textarea>
+  </div>
+</div>
+
+<div style="text-align:center">
+  <button class="btn" onclick="compare()">🔍 Porovnat</button>
+  <button class="btn btn-outline" onclick="resetAll()">✕ Smazat vše</button>
+</div>
+
+<div class="results" id="results" style="display:none">
+  <h2>📊 Výsledky porovnání</h2>
+  
+  <div class="stat-row">
+    <div class="stat-item" id="stat-len-a"></div>
+    <div class="stat-item" id="stat-len-b"></div>
+    <div class="stat-item" id="stat-diff"></div>
+  </div>
+  
+  <h3 style="margin-top:1.5rem">🔄 Shodné a rozdílné věty</h3>
+  <table id="comparison-table">
+    <tr><th>Text A</th><th>Text B</th><th>Stav</th></tr>
+  </table>
+  
+  <p style="font-size:.75rem;color:#888;margin-top:1rem">Porovnání je založeno na větách. Detekce je orientační.</p>
+</div>
+
+<script>
+function compare() {
+  const textA = document.getElementById('text-a').value.trim();
+  const textB = document.getElementById('text-b').value.trim();
+  
+  if (!textA || !textB) {
+    alert('Vyplňte oba texty');
+    return;
+  }
+  
+  // Rozdělení na věty
+  const sentencesA = textA.split(/(?<=[.!?…])\s+/).filter(s => s.trim().length > 2);
+  const sentencesB = textB.split(/(?<=[.!?…])\s+/).filter(s => s.trim().length > 2);
+  
+  // Základní statistiky
+  const wordsA = textA.split(/\s+/).length;
+  const wordsB = textB.split(/\s+/).length;
+  const diff = Math.abs(wordsA - wordsB);
+  const percent = Math.round((diff / Math.max(wordsA, wordsB)) * 100);
+  
+  document.getElementById('stat-len-a').innerHTML = `<strong>Text A</strong><br>${sentencesA.length} vět, ${wordsA} slov`;
+  document.getElementById('stat-len-b').innerHTML = `<strong>Text B</strong><br>${sentencesB.length} vět, ${wordsB} slov`;
+  document.getElementById('stat-diff').innerHTML = `<strong>Rozdíl</strong><br>${diff} slov (${percent} %)`;
+  
+  // Porovnání vět
+  const table = document.getElementById('comparison-table');
+  table.innerHTML = '<tr><th>Text A</th><th>Text B</th><th>Stav</th></tr>';
+  
+  const maxLen = Math.max(sentencesA.length, sentencesB.length);
+  for (let i = 0; i < maxLen; i++) {
+    const row = table.insertRow();
+    const cellA = row.insertCell();
+    const cellB = row.insertCell();
+    const cellStatus = row.insertCell();
+    
+    const a = sentencesA[i] || '';
+    const b = sentencesB[i] || '';
+    
+    cellA.textContent = a || '—';
+    cellB.textContent = b || '—';
+    
+    if (!a || !b) {
+      cellStatus.textContent = !a ? 'Pouze v B' : 'Pouze v A';
+      row.classList.add('diff');
+    } else if (similarity(a, b) > 0.8) {
+      cellStatus.textContent = 'Shodné';
+      row.classList.add('same');
+    } else {
+      cellStatus.textContent = 'Rozdílné';
+      row.classList.add('diff');
+    }
+  }
+  
+  document.getElementById('results').style.display = 'block';
+  results.scrollIntoView({behavior:'smooth'});
+}
+
+function similarity(s1, s2) {
+  const a = s1.toLowerCase().replace(/[^a-zá-ž]/g, ' ').split(/\s+/);
+  const b = s2.toLowerCase().replace(/[^a-zá-ž]/g, ' ').split(/\s+/);
+  const common = a.filter(w => w.length > 3 && b.includes(w)).length;
+  const total = Math.max(a.length, b.length);
+  return total > 0 ? common / total : 0;
+}
+
+function resetAll() {
+  document.getElementById('text-a').value = '';
+  document.getElementById('text-b').value = '';
+  document.getElementById('results').style.display = 'none';
+}
+</script>
+</body>
+</html>
