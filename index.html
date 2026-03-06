@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🐁 Chceš myš? – Kognitivní mapa případu</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* ── TÉMA ── */
+:root{
+  --ink:#111;--paper:#fff;--soft:#f5f5f5;--mid:#e0e0e0;--dim:#888;--faint:#ddd;
+  --red:#c0392b;--red-bg:#fff0ee;
+  --green:#2a7a3a;--green-bg:#f0fff3;
+  --blue:#2050a0;--blue-bg:#eef4ff;
+  --gray-bg:#f8f8f8;--radius:3px;
+  --border:#111;
+}
+body.dark{
+  --ink:#e8e0d0;--paper:#141414;--soft:#1e1e1e;--mid:#333;--dim:#999;--faint:#2a2a2a;
+  --red-bg:#2a1010;--green-bg:#0e2010;--blue-bg:#0e1830;
+  --gray-bg:#1a1a1a;--border:#444;
+}
+body{font-family:Georgia,serif;background:var(--paper);color:var(--ink);max-width:900px;margin:0 auto;padding:1.5rem 1rem;line-height:1.6;font-size:15px;transition:background .2s,color .2s}
+
+h2{font-size:1.1rem;margin:2rem 0 .6rem;border-bottom:2px solid var(--border);padding-bottom:.3rem}
+.nav{font-size:.82rem;color:var(--dim);margin-bottom:1.2rem;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.4rem}
+
+/* ── BUTTONS ── */
+.btn{padding:.4rem 1rem;background:var(--ink);color:var(--paper);border:none;cursor:pointer;font-size:.85rem;font-family:Georgia,serif;border-radius:var(--radius);transition:opacity .15s}
+.btn:hover{opacity:.8}
+.btn-sm{padding:.25rem .65rem;font-size:.78rem}
+.btn-outline{background:var(--paper);color:var(--ink);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--soft)}
+.btn-ghost{background:none;border:none;color:var(--dim);cursor:pointer;font-size:.78rem;font-family:Georgia,serif;padding:.2rem .4rem}
+.btn-ghost:hover{color:var(--ink)}
+.btn-danger{background:var(--paper);color:#c00;border:1px solid #fcc;font-size:.75rem;padding:.2rem .5rem;cursor:pointer;font-family:Georgia,serif;border-radius:var(--radius)}
+.btn-danger:hover{border-color:#c00;background:var(--red-bg)}
+.btn-row{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.7rem;align-items:center}
+
+/* ── DETAILS / PANELS ── */
+details{border:1px solid var(--border);margin-bottom:1rem}
+details summary{cursor:pointer;padding:.65rem 1rem;font-weight:bold;list-style:none;user-select:none;display:flex;align-items:center;gap:.5rem;background:var(--soft);color:var(--ink)}
+details summary::before{content:"▶ ";font-size:.75rem;flex-shrink:0;color:var(--dim)}
+details[open] summary::before{content:"▼ "}
+.panel-dark summary{background:var(--ink);color:var(--paper)}
+body.dark .panel-dark summary::before{color:#aaa}
+.panel-body{padding:1rem;border-top:1px solid var(--border);font-size:.88rem;background:var(--paper)}
+
+/* ── BASELINE FIELDS ── */
+.baseline-fields{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin-bottom:.7rem}
+.b-field{position:relative}
+.b-field.full{grid-column:1/-1}
+.b-field label{display:block;font-size:.72rem;font-weight:bold;color:var(--dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.2rem}
+.b-field input,.b-field textarea{width:100%;padding:.35rem .5rem;border:1px solid var(--faint);font-family:Georgia,serif;font-size:.85rem;resize:vertical;background:var(--gray-bg);border-radius:var(--radius);color:var(--ink)}
+.b-field textarea{min-height:55px}
+.b-field input:focus,.b-field textarea:focus{outline:none;border-color:var(--dim)}
+.b-close{position:absolute;top:0;right:0;background:none;border:none;color:var(--dim);cursor:pointer;font-size:.9rem;padding:.1rem .3rem;line-height:1}
+.b-close:hover{color:#c00}
+.b-field.hidden{display:none}
+.custom-field-row{display:flex;gap:.5rem;margin-bottom:.5rem}
+.custom-field-row input{flex:1;padding:.3rem .5rem;border:1px solid var(--faint);font-family:Georgia,serif;font-size:.85rem;border-radius:var(--radius);color:var(--ink);background:var(--gray-bg)}
+
+/* ── BASELINE KEY ── */
+.key-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.5rem;margin-top:.5rem}
+.key-item{border:1px solid var(--faint);padding:.5rem .7rem;border-radius:var(--radius);background:var(--gray-bg)}
+.key-item-name{font-size:.7rem;font-weight:bold;text-transform:uppercase;letter-spacing:.05em;color:var(--dim);margin-bottom:.2rem}
+.key-item-value{font-size:.83rem;color:var(--ink);white-space:pre-wrap}
+.key-empty{font-size:.82rem;color:var(--dim);font-style:italic;padding:.5rem}
+
+/* ── PORUCHY PANEL ── */
+.porucha-row{display:flex;gap:.7rem;padding:.55rem 0;border-bottom:1px solid var(--faint);align-items:flex-start}
+.porucha-row:last-child{border-bottom:none}
+.porucha-badge{flex-shrink:0;width:14px;height:14px;border-radius:2px;margin-top:3px}
+.porucha-name{font-weight:bold;font-size:.85rem;display:block;margin-bottom:.15rem}
+.porucha-desc{font-size:.8rem;color:var(--dim);line-height:1.4}
+.porucha-detect{font-size:.72rem;color:var(--dim);font-style:italic;margin-top:.2rem}
+
+/* ── NAVOD PANEL ── */
+.navod-sekce{margin-bottom:1rem}
+.navod-sekce h3{font-size:.92rem;margin-bottom:.4rem;color:var(--ink)}
+.navod-sekce p,.navod-sekce li{font-size:.85rem;color:var(--dim);line-height:1.6;margin-bottom:.3rem}
+.navod-sekce ul{margin-left:1.2rem}
+.navod-krok{display:flex;gap:.7rem;margin-bottom:.5rem;font-size:.85rem}
+.navod-num{flex-shrink:0;width:22px;height:22px;background:var(--ink);color:var(--paper);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:bold;margin-top:1px}
+
+/* ── STATEMENT CARDS ── */
+.statements-area{margin-top:.5rem}
+.stmt-card{border:1px solid var(--border);margin-bottom:1rem;background:var(--paper)}
+.stmt-card.drag-over{box-shadow:0 -3px 0 var(--ink)}
+.stmt-header{display:flex;align-items:center;gap:.5rem;padding:.6rem .8rem;background:var(--soft);cursor:pointer;user-select:none;border-bottom:1px solid var(--mid)}
+.drag-handle{cursor:grab;color:var(--dim);font-size:.9rem;padding:0 .2rem;flex-shrink:0}
+.drag-handle:active{cursor:grabbing}
+.stmt-title{font-weight:bold;font-size:.9rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stmt-role-badge{font-size:.7rem;padding:.1rem .5rem;border-radius:20px;font-weight:normal;flex-shrink:0;white-space:nowrap}
+.role-obet{background:#fff0ee;color:#c0392b;border:1px solid #f5b8b0}
+.role-podezrely{background:#fff8ee;color:#c06000;border:1px solid #f5d5a0}
+.role-obzalovany{background:#ffe8e8;color:#900;border:1px solid #f0a0a0}
+.role-svedek{background:#eef4ff;color:#2050a0;border:1px solid #b0c8f0}
+.role-expert{background:#f0fff3;color:#2a7a3a;border:1px solid #a0d8b0}
+.role-jiny{background:var(--gray-bg);color:var(--dim);border:1px solid var(--faint)}
+body.dark .role-obet{background:#2a1010}
+body.dark .role-podezrely{background:#2a1a08}
+body.dark .role-obzalovany{background:#220808}
+body.dark .role-svedek{background:#0e1830}
+body.dark .role-expert{background:#0a1e10}
+.stmt-status{font-size:.72rem;color:var(--dim);font-style:italic;flex-shrink:0}
+.stmt-status.done{color:var(--green);font-weight:bold}
+.stmt-body{padding:1rem;font-size:.87rem}
+.stmt-section{margin-bottom:1.1rem}
+.stmt-section > label{display:block;font-size:.75rem;font-weight:bold;color:#666;text-transform:uppercase;letter-spacing:.04em;margin-bottom:.4rem}
+body.dark .stmt-section > label{color:#aaa}
+.stmt-row{display:flex;gap:.6rem;margin-bottom:.9rem;flex-wrap:wrap}
+.stmt-input{padding:.3rem .5rem;border:1px solid var(--faint);font-family:Georgia,serif;font-size:.88rem;border-radius:var(--radius);background:var(--gray-bg);color:var(--ink)}
+.stmt-input:focus{outline:none;border-color:var(--dim)}
+.stmt-name{flex:1;min-width:150px}
+.stmt-role-sel{padding:.3rem .5rem;border:1px solid var(--border);font-family:Georgia,serif;font-size:.85rem;background:var(--paper);border-radius:var(--radius);color:var(--ink)}
+
+/* ── TEXT AREA ── */
+.text-upload-bar{display:flex;gap:.5rem;align-items:center;margin-bottom:.4rem;flex-wrap:wrap}
+.upload-hint{font-size:.75rem;color:var(--dim)}
+.stmt-textarea{width:100%;padding:.5rem;border:1px solid var(--faint);font-family:Georgia,serif;font-size:.85rem;resize:vertical;min-height:110px;border-radius:var(--radius);background:var(--gray-bg);color:var(--ink);display:block}
+.stmt-textarea:focus{outline:none;border-color:var(--dim)}
+/* KEY FIX: prevent drag interference on text interaction */
+.stmt-body *{-webkit-user-drag:none}
+.stmt-textarea,.notes-area,.stmt-input,.match-note,.custom-field-row input{user-select:text;-webkit-user-select:text}
+
+.highlighted-view{width:100%;padding:.5rem;border:1px solid var(--faint);font-size:.85rem;min-height:110px;border-radius:var(--radius);background:var(--paper);line-height:2.1;display:none;white-space:pre-wrap;word-break:break-word;color:var(--ink)}
+.d-mezera  {background:#ffcdd2;border-radius:2px;cursor:help}
+.d-preskok {background:#ffe0b2;border-radius:2px;cursor:help}
+.d-cas     {background:#fff9c4;border-radius:2px;cursor:help}
+.d-role    {background:#c8e6c9;border-radius:2px;cursor:help}
+.d-tema    {background:#bbdefb;border-radius:2px;cursor:help}
+.d-fixace  {background:#e1bee7;border-radius:2px;cursor:help}
+.d-detail  {background:#f8bbd0;border-radius:2px;cursor:help}
+.d-syntax  {background:#d7ccc8;border-radius:2px;cursor:help}
+.d-vypln   {background:#b2dfdb;border-radius:2px;cursor:help}
+.d-tempo   {background:#c5cae9;border-radius:2px;cursor:help}
+.d-delka   {background:#f0f4c3;border-radius:2px;cursor:help}
+.d-sousede {background:#ffccbc;border-radius:2px;cursor:help}
+.disorder-legend{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.5rem}
+.legend-item{font-size:.7rem;padding:.15rem .45rem;border-radius:2px;cursor:default}
+
+/* ── BASELINE MATCHING IN STATEMENT (collapsible, filled-only) ── */
+.matching-panel{border:1px solid var(--faint);border-radius:var(--radius);overflow:hidden;margin-top:.3rem}
+.matching-panel summary{cursor:pointer;padding:.45rem .7rem;font-size:.8rem;font-weight:bold;list-style:none;background:var(--gray-bg);color:var(--dim);display:flex;align-items:center;gap:.4rem;user-select:none}
+.matching-panel summary::before{content:"▶ ";font-size:.65rem}
+.matching-panel[open] summary::before{content:"▼ "}
+.matching-grid{display:flex;flex-direction:column;gap:.35rem;padding:.6rem}
+.match-row{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;padding:.3rem .4rem;background:var(--gray-bg);border-radius:var(--radius)}
+.match-field-name{min-width:90px;font-size:.78rem;font-weight:bold;color:var(--dim)}
+.match-btns{display:flex;gap:.25rem}
+.match-btn{padding:.15rem .5rem;font-size:.72rem;cursor:pointer;border:1px solid var(--faint);background:var(--paper);font-family:Georgia,serif;border-radius:var(--radius);color:var(--ink)}
+.match-btn:hover{border-color:var(--dim)}
+.match-btn.sedi  {background:#2a7a3a;color:#fff;border-color:#2a7a3a}
+.match-btn.nesedi{background:#c0392b;color:#fff;border-color:#c0392b}
+.match-btn.chybi {background:#888;color:#fff;border-color:#888}
+.match-note{flex:1;min-width:110px;padding:.15rem .4rem;border:1px solid var(--faint);font-family:Georgia,serif;font-size:.74rem;border-radius:var(--radius);background:var(--paper);color:var(--ink)}
+.match-note:focus{outline:none;border-color:var(--dim)}
+.match-empty{font-size:.8rem;color:var(--dim);font-style:italic;padding:.5rem}
+.match-status-row{display:flex;gap:.3rem;flex-wrap:wrap;font-size:.72rem;margin-top:.3rem}
+.ms-chip{padding:.1rem .45rem;border-radius:20px;font-size:.7rem}
+.ms-sedi  {background:var(--green-bg);color:var(--green);border:1px solid #a0c8a0}
+.ms-nesedi{background:var(--red-bg);color:var(--red);border:1px solid #f0a0a0}
+.ms-chybi {background:var(--gray-bg);color:var(--dim);border:1px solid var(--faint)}
+
+/* ── NOTES ── */
+.notes-area{width:100%;padding:.4rem .5rem;border:1px solid var(--faint);font-family:Georgia,serif;font-size:.82rem;min-height:50px;resize:vertical;border-radius:var(--radius);background:var(--gray-bg);color:var(--ink)}
+.notes-area:focus{outline:none;border-color:var(--dim)}
+
+/* ── DISORDER TAGS ── */
+.disorder-summary{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem}
+.dsm-tag{font-size:.7rem;padding:.15rem .5rem;border-radius:20px;border:1px solid var(--faint);background:var(--soft);color:var(--ink)}
+
+/* ── RESULTS ── */
+.results-section{margin-top:2rem;border-top:3px solid var(--border);padding-top:1.2rem;display:none}
+.chart-row{display:flex;align-items:center;gap:2rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.chart-legend{display:flex;flex-direction:column;gap:.4rem;font-size:.83rem}
+.leg-row{display:flex;align-items:center;gap:.5rem}
+.leg-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+.map-table{width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:1.2rem}
+.map-table th,.map-table td{border:1px solid var(--faint);padding:.4rem .6rem;text-align:left;vertical-align:top}
+.map-table th{background:var(--ink);color:var(--paper);font-size:.75rem}
+.cell-sedi {background:var(--green-bg);color:var(--green)}
+.cell-nesedi{background:var(--red-bg);color:var(--red)}
+.cell-chybi{background:var(--gray-bg);color:var(--dim)}
+.sekce{margin-bottom:1.5rem}
+.sekce h3{border-bottom:1px solid var(--mid);padding-bottom:.2rem;margin-bottom:.7rem;font-size:.95rem}
+.alert-item{padding:.4rem .7rem;margin-bottom:.4rem;border-radius:var(--radius);font-size:.83rem;border-left:3px solid}
+.alert-rozpor{background:var(--red-bg);border-color:var(--red)}
+.alert-shoda {background:var(--green-bg);border-color:var(--green)}
+.alert-slepo {background:var(--gray-bg);border-color:var(--dim)}
+.field-detail-toggle{cursor:pointer;font-size:.76rem;color:#2050a0;margin-left:.5rem;text-decoration:underline}
+.field-detail-body{display:none;margin-top:.4rem}
+
+/* ── TOP BAR ── */
+.autosave-bar{font-size:.75rem;color:var(--dim);font-style:italic;margin-bottom:1rem}
+.case-name-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.6rem;flex-wrap:wrap}
+.case-name-input{flex:1;max-width:350px;padding:.35rem .6rem;border:1px solid var(--faint);font-family:Georgia,serif;font-size:1rem;font-weight:bold;border-radius:var(--radius);background:var(--paper);color:var(--ink)}
+.case-name-input:focus{outline:none;border-color:var(--dim)}
+.theme-toggle{font-size:.8rem;padding:.3rem .7rem;cursor:pointer;border:1px solid var(--faint);background:var(--soft);color:var(--ink);font-family:Georgia,serif;border-radius:var(--radius)}
+
+@media(max-width:600px){
+  .baseline-fields{grid-template-columns:1fr}
+  .b-field.full{grid-column:1}
+  .chart-row{flex-direction:column}
+  .stmt-row{flex-direction:column}
+}
+@media print{
+  .btn,.btn-row,.drag-handle,.upload-hint,.text-upload-bar,.autosave-bar,.nav,.b-close,.theme-toggle{display:none!important}
+  .highlighted-view{display:block!important}
+  .stmt-textarea{display:none!important}
+  details{border:none}
+  details[open] .panel-body,.matching-panel .matching-grid{display:block!important}
+  .stmt-card{page-break-inside:avoid}
+  body{color:#000;background:#fff}
+}
+</style>
+</head>
+<body>
+
+<div class="nav">
+  <span>🐁 Chceš myš? — Kognitivní mapa případu</span>
+  <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">🌙 Tmavé téma</button>
+</div>
+
+<div class="case-name-row">
+  <input class="case-name-input" id="case-name" type="text" placeholder="Název případu…" oninput="save()">
+  <button class="btn btn-sm btn-outline" onclick="exportJSON()">↓ Export</button>
+  <button class="btn btn-sm btn-outline" onclick="importJSON()">↑ Import</button>
+  <button class="btn btn-sm btn-outline" onclick="window.print()">⎙ Tisk</button>
+</div>
+<div class="autosave-bar" id="autosave-bar">Zápisník se ukládá průběžně — data zůstávají jen v prohlížeči.</div>
+
+<!-- ══ NÁVOD ══ -->
+<details id="navod-panel">
+  <summary>📖 Jak používat tento nástroj</summary>
+  <div class="panel-body">
+    <div class="navod-sekce">
+      <h3>Co tento nástroj dělá</h3>
+      <p>Kognitivní mapa případu je zápisník pro strukturovanou analýzu výpovědí. Pomáhá vidět <strong>jazykové vzorce</strong> — ne obsah, ale strukturu. Kde se mění čas, kde mizí subjekt, kde se věta rozpadá. Nástroj nic nerozhoduje — mapu tvoří člověk, systém jen organizuje to, co člověk zapíše.</p>
+    </div>
+    <div class="navod-sekce">
+      <h3>Postup krok za krokem</h3>
+      <div class="navod-krok"><div class="navod-num">1</div><div>Vyplňte <strong>Baseline případu</strong> — co je o případu známo: čas, místo, osoby, důkazy, motivy. Nepotřebujete vyplnit vše. Pole která nepotřebujete zavřete křížkem.</div></div>
+      <div class="navod-krok"><div class="navod-num">2</div><div>Klikněte <strong>Uložit a vygenerovat klíč baseline</strong>. Vyplněné položky se zobrazí jako referenční přehled v panelu Klíč baseline — máte je vždy po ruce.</div></div>
+      <div class="navod-krok"><div class="navod-num">3</div><div>Přidejte <strong>výpovědi</strong> — každou osobu jako samostatnou kartu. Vyplňte jméno, roli a text výpovědi (nebo nahrajte soubor).</div></div>
+      <div class="navod-krok"><div class="navod-num">4</div><div>U každé výpovědi klikněte <strong>Detekovat poruchy</strong> — text se barevně zvýrazní podle jazykových signálů. Jde o návrh, ne diagnózu — zkontrolujte to sami.</div></div>
+      <div class="navod-krok"><div class="navod-num">5</div><div>V sekci <strong>Porovnání s baseline</strong> označte pro každou oblast: <em>sedí / nesedí / chybí</em>. Přidejte poznámku. Toto je klíčová část — děláte to vy, ne algoritmus.</div></div>
+      <div class="navod-krok"><div class="navod-num">6</div><div>Klikněte <strong>Sestavit kognitivní mapu</strong> — zobrazí se přehled shod, rozporů a slepých míst napříč všemi výpověďmi.</div></div>
+    </div>
+    <div class="navod-sekce">
+      <h3>Co nástroj není</h3>
+      <ul>
+        <li>Není detektor lži. Jazykové poruchy jsou signály k prozkoumání, ne důkaz.</li>
+        <li>Nerozhoduje o vině. Výstupy jsou podkladový materiál pro člověka.</li>
+        <li>Nepracuje s významem — pracuje se strukturou jazyka.</li>
+        <li>Nevhodný pro laickou veřejnost bez kontextu trestního řízení.</li>
+      </ul>
+    </div>
+    <div class="navod-sekce">
+      <h3>Technické poznámky</h3>
+      <ul>
+        <li>Data se ukládají jen v prohlížeči (localStorage). Žádný server.</li>
+        <li>Export / Import: celý případ uložíte jako JSON a kdykoli obnovíte.</li>
+        <li>Karty výpovědí lze přetahovat myší pro přeuspořádání.</li>
+        <li>Ke každé osobě lze přidat více zápisů (např. různé výslechy).</li>
+      </ul>
+    </div>
+  </div>
+</details>
+
+<!-- ══ BASELINE ══ -->
+<details id="baseline-panel">
+  <summary class="panel-dark">📋 Baseline případu</summary>
+  <div class="panel-body">
+    <p style="font-size:.8rem;color:#888;margin-bottom:.8rem">Vyplňte co je o případu známo. Pole zavřete křížkem nebo přidejte vlastní. Po uložení se vygeneruje referenční klíč.</p>
+    <div class="baseline-fields" id="baseline-fields"></div>
+    <div style="margin-bottom:.8rem">
+      <strong style="font-size:.8rem;color:var(--dim)">Přidat vlastní pole:</strong>
+      <div class="custom-field-row" style="margin-top:.3rem">
+        <input type="text" id="custom-field-name" placeholder="Název pole (Alibi, Komunikace…)">
+        <button class="btn btn-sm" onclick="addCustomField()">+ Přidat</button>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn" onclick="generateKey()">💾 Uložit a vygenerovat klíč baseline</button>
+      <button class="btn btn-outline btn-sm" onclick="resetBaseline()">Reset</button>
+    </div>
+  </div>
+</details>
+
+<!-- ══ KEY ══ -->
+<details id="key-panel">
+  <summary>🔑 Klíč baseline (referenční přehled)</summary>
+  <div class="panel-body" id="key-body">
+    <span class="key-empty">Nejprve vyplňte a uložte baseline — klíč se vygeneruje automaticky.</span>
+  </div>
+</details>
+
+<!-- ══ PORUCHY ══ -->
+<details id="poruchy-panel">
+  <summary>🔍 Jazykové poruchy — klíč a vysvětlení</summary>
+  <div class="panel-body" id="poruchy-body"></div>
+</details>
+
+<!-- ══ STATEMENTS ══ -->
+<h2>🗂 Zápisník výpovědí</h2>
+<div class="btn-row" style="margin-bottom:.8rem">
+  <button class="btn" onclick="addStatement()">＋ Přidat výpověď</button>
+  <button class="btn btn-outline" onclick="collapseAll()">Sbalit vše</button>
+  <button class="btn btn-outline" onclick="expandAll()">Rozbalit vše</button>
+</div>
+<div class="statements-area" id="statements-area">
+  <p class="empty-msg" style="color:var(--dim);font-size:.85rem;font-style:italic">Zatím žádné výpovědi. Klikněte na „Přidat výpověď".</p>
+</div>
+<div class="btn-row" style="margin-top:1rem">
+  <button class="btn" id="btn-map" style="display:none" onclick="buildMap()">🧠 Sestavit kognitivní mapu případu</button>
+</div>
+
+<!-- ══ RESULTS ══ -->
+<div class="results-section" id="results-section">
+  <h2>🧠 Kognitivní mapa případu</h2>
+  <div id="results-body"></div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════════════
+const PREDEFINED_FIELDS = [
+  {id:'cas',      label:'Čas / datum',    type:'text',     placeholder:'Kdy se skutek stal, časové kotvy…'},
+  {id:'misto',    label:'Místo',          type:'text',     placeholder:'Kde, přesná lokace…'},
+  {id:'osoby',    label:'Osoby',          type:'textarea', placeholder:'Kdo, jména, popisy, role v případu…'},
+  {id:'vztahy',   label:'Vztahy',         type:'textarea', placeholder:'Vazby mezi osobami…'},
+  {id:'dukazy',   label:'Důkazy',         type:'textarea', placeholder:'Fyzické, digitální, svědecké…'},
+  {id:'motivy',   label:'Motivy',         type:'text',     placeholder:'Předpokládané motivy…'},
+  {id:'sled',     label:'Sled událostí',  type:'textarea', placeholder:'Chronologie jak by měla vypadat…'},
+  {id:'hypotezy', label:'Hypotézy',       type:'textarea', placeholder:'Pracovní verze co se stalo…'},
+  {id:'slepa',    label:'Slepá místa',    type:'textarea', placeholder:'Co nevíme, co chybí…'},
+  {id:'otazky',   label:'Klíčové otázky', type:'textarea', placeholder:'Na co výpovědi musí odpovědět…'},
+];
+
+const PORUCHY = [
+  {id:'mezera',  label:'Mezera / výpadek',       color:'#ffcdd2', textColor:'#900',
+   desc:'Mluvčí vynechá klíčovou informaci, přiznává ztrátu paměti nebo odmítá odpovědět.',
+   detect:'Klíčová slova: nevím, nepamatuju, nemohu říct, netuším…',
+   patterns:['nevím','nepamatuju','nepamatuji','nemohu říct','nemůžu říct','netuším','to je složité','si nejsem jist','neprozradím','nechci mluvit','raději nebudu','to nevím','to si nepamatuji']},
+
+  {id:'preskok', label:'Přeskok',                color:'#ffe0b2', textColor:'#c06000',
+   desc:'Narativ skočí bez logického přechodu — chybí část sekvence.',
+   detect:'Klíčová slova: najednou, aniž by, zčistajasna, rázem…',
+   patterns:['najednou','aniž by','bez varování','zčistajasna','rázem','v tu ránu','hned nato','a pak hned']},
+
+  {id:'cas',     label:'Změna časového rámce',   color:'#fff9c4', textColor:'#8a7000',
+   desc:'Neočekávaný přechod mezi minulostí, přítomností a budoucností — věty mění čas bez zjevného důvodu.',
+   detect:'Klíčová slova: včera, dnes, zítra, teď, potom, předtím, dříve…',
+   patterns:['včera','dnes','zítra','teď','potom','předtím','později','dříve','následně','nejdřív','nakonec','mezitím']},
+
+  {id:'role',    label:'Změna role / subjektu',  color:'#c8e6c9', textColor:'#1a5e20',
+   desc:'Perspektiva se mění — já → on/ona, oběť → svědek. Mluvčí přesouvá zodpovědnost na jinou osobu.',
+   detect:'Detekováno algoritmicky: přechod mezi já/my/oni mezi větami.',
+   patterns:[]},
+
+  {id:'tema',    label:'Posun tématu',            color:'#bbdefb', textColor:'#0d3a7a',
+   desc:'Náhlá odbočka bez zjevné příčiny — mluvčí změní téma uprostřed výpovědi.',
+   detect:'Klíčová slova: mimochodem, ale jinak, co se týče, ostatně…',
+   patterns:['mimochodem','ale jinak','co se týče','jiná věc','ostatně','kromě toho','a ještě','a vlastně']},
+
+  {id:'fixace',  label:'Fixace / repetice',      color:'#e1bee7', textColor:'#4a1060',
+   desc:'Opakované vracení ke stejnému bodu, slovu nebo osobě — i když to kontext nevyžaduje.',
+   detect:'Detekováno algoritmicky: slova opakující se 2× a více v celé výpovědi.',
+   patterns:[]},
+
+  {id:'detail',  label:'Izolovaný detail',       color:'#f8bbd0', textColor:'#880040',
+   desc:'Nepřirozeně přesný popis věci, která je mimo kontext — čísla, časy, barvy bez relevance.',
+   detect:'Klíčová slova: přesně v, do puntíku, naprosto přesně, konkrétně…',
+   patterns:['přesně v','konkrétně','do puntíku','naprosto přesně','přesně takhle','přesně tehdy']},
+
+  {id:'syntax',  label:'Rozpad syntaxe',         color:'#d7ccc8', textColor:'#3e2723',
+   desc:'Věta se rozpadá, nedokončuje, přerušuje — výpověď ztrácí gramatickou strukturu.',
+   detect:'Klíčová slova / znaky: …, --, prostě no, a prostě…',
+   patterns:['…','--','prostě no','ale no','takže prostě','a prostě']},
+
+  {id:'vypln',   label:'Výplňová slova',         color:'#b2dfdb', textColor:'#00363a',
+   desc:'Slova bez obsahu zakrývající váhání nebo přemýšlení — jazykový šum.',
+   detect:'Klíčová slova: jakože, vlastně, no tak, víš co, chci říct…',
+   patterns:['jakože','vlastně','no tak','víš co','chci říct','to znamená','jednoduše řečeno','dalo by se říct']},
+
+  {id:'tempo',   label:'Změna tempa',            color:'#c5cae9', textColor:'#1a237e',
+   desc:'Náhlé zrychlení nebo zpomalení — extrémně dlouhé věty (přetížení) nebo série velmi krátkých.',
+   detect:'Detekováno algoritmicky: délka věty výrazně nad průměrem výpovědi.',
+   patterns:[]},
+
+  {id:'delka',   label:'Změna délky vět',        color:'#f0f4c3', textColor:'#524500',
+   desc:'Výrazná odchylka délky věty od průměru celé výpovědi — signal změny kognitivní zátěže.',
+   detect:'Detekováno algoritmicky: statistická odchylka délky věty.',
+   patterns:[]},
+
+  {id:'sousede', label:'Neobvyklé sousedství slov', color:'#ffccbc', textColor:'#bf360c',
+   desc:'Slova, která spolu normálně nestojí — narušení rytmu a očekávané kombinace.',
+   detect:'Základní detekce: slova po čárkách a spojkách s neobvyklou kombinací.',
+   patterns:[]},
+];
+
+const ROLE_LABELS = {
+  obet:'Oběť', podezrely:'Podezřelý', obzalovany:'Obžalovaný',
+  svedek:'Svědek', expert:'Znalec/Expert', jiny:'Jiná role'
+};
+const ROLE_CLASS = {
+  obet:'role-obet', podezrely:'role-podezrely', obzalovany:'role-obzalovany',
+  svedek:'role-svedek', expert:'role-expert', jiny:'role-jiny'
+};
+
+// ═══════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════
+let state = {
+  caseName:'', dark:false,
+  baselineFields: PREDEFINED_FIELDS.map(f=>({...f, value:'', hidden:false})),
+  customFields:[], keyGenerated:false,
+  statements:[], nextId:1
+};
+const SAVE_KEY = 'lexis_v5';
+
+// ═══════════════════════════════════════════════
+// THEME
+// ═══════════════════════════════════════════════
+function toggleTheme(){
+  state.dark = !state.dark;
+  applyTheme();
+  save();
+}
+function applyTheme(){
+  document.body.classList.toggle('dark', state.dark);
+  document.getElementById('theme-btn').textContent = state.dark ? '☀ Světlé téma' : '🌙 Tmavé téma';
+}
+
+// ═══════════════════════════════════════════════
+// RENDER PORUCHY PANEL
+// ═══════════════════════════════════════════════
+(function renderPoruchy(){
+  const el = document.getElementById('poruchy-body');
+  el.innerHTML = `<p style="font-size:.8rem;color:var(--dim);margin-bottom:.8rem">
+    Nástroj detekuje 12 typů jazykových poruch. Detekce je automatická — vždy jen návrh k vlastnímu posouzení.
+    Poruchy pracují se strukturou jazyka, ne s obsahem ani pravdivostí výpovědi.
+  </p>` +
+  PORUCHY.map(p=>`
+    <div class="porucha-row">
+      <div class="porucha-badge" style="background:${p.color}"></div>
+      <div>
+        <span class="porucha-name">${p.label}</span>
+        <span class="porucha-desc">${p.desc}</span>
+        <span class="porucha-detect">${p.detect}</span>
+      </div>
+    </div>`).join('');
+})();
+
+// ═══════════════════════════════════════════════
+// BASELINE
+// ═══════════════════════════════════════════════
+function renderBaselineFields(){
+  const c = document.getElementById('baseline-fields');
+  let h = '';
+  state.baselineFields.forEach(f=>{
+    const cls = f.hidden ? 'b-field hidden' : (f.type==='textarea' ? 'b-field full' : 'b-field');
+    const val = escHtml(f.value||'');
+    h+=`<div class="${cls}" id="bf-${f.id}">
+      <label>${f.label}</label>
+      <button class="b-close" title="Skrýt" onclick="hideField('${f.id}')">✕</button>
+      ${f.type==='textarea'
+        ?`<textarea id="bv-${f.id}" placeholder="${f.placeholder}" oninput="updateField('${f.id}',this.value)">${val}</textarea>`
+        :`<input type="text" id="bv-${f.id}" placeholder="${f.placeholder}" value="${val}" oninput="updateField('${f.id}',this.value)">`
+      }
+    </div>`;
+  });
+  state.customFields.forEach(cf=>{
+    const val=escHtml(cf.value||'');
+    h+=`<div class="b-field full" id="bcf-${cf.id}">
+      <label>${escHtml(cf.label)}</label>
+      <button class="b-close" onclick="removeCustomField('${cf.id}')">✕</button>
+      <textarea id="bcv-${cf.id}" placeholder="Vyplňte…" oninput="updateCustomField('${cf.id}',this.value)">${val}</textarea>
+    </div>`;
+  });
+  c.innerHTML = h;
+}
+function hideField(id){ const f=state.baselineFields.find(f=>f.id===id); if(f){f.hidden=true;renderBaselineFields();save();} }
+function updateField(id,val){ const f=state.baselineFields.find(f=>f.id===id); if(f){f.value=val;save();} }
+function addCustomField(){
+  const el=document.getElementById('custom-field-name');
+  const name=el.value.trim(); if(!name)return;
+  state.customFields.push({id:'cf_'+Date.now(),label:name,value:''});
+  el.value=''; renderBaselineFields(); save();
+}
+function removeCustomField(id){
+  state.customFields=state.customFields.filter(f=>f.id!==id);
+  renderBaselineFields(); rebuildAllMatching(); save();
+}
+function updateCustomField(id,val){ const f=state.customFields.find(f=>f.id===id); if(f){f.value=val;save();} }
+function resetBaseline(){
+  if(!confirm('Resetovat baseline?'))return;
+  state.baselineFields=PREDEFINED_FIELDS.map(f=>({...f,value:'',hidden:false}));
+  state.customFields=[];
+  renderBaselineFields();
+  document.getElementById('key-body').innerHTML='<span class="key-empty">Nejprve vyplňte a uložte baseline.</span>';
+  save();
+}
+function showAllFields(){ state.baselineFields.forEach(f=>f.hidden=false); renderBaselineFields(); save(); }
+function getActiveBaselineFields(){
+  return [...state.baselineFields.filter(f=>!f.hidden), ...state.customFields];
+}
+// Only fields with value filled
+function getFilledBaselineFields(){
+  return getActiveBaselineFields().filter(f=>(f.value||'').trim());
+}
+
+function generateKey(){
+  save();
+  const filled = getFilledBaselineFields();
+  const keyBody = document.getElementById('key-body');
+  if(!filled.length){ keyBody.innerHTML='<span class="key-empty">Žádná vyplněná pole baseline.</span>'; return; }
+  let h='<div class="key-grid">';
+  filled.forEach(f=>{
+    h+=`<div class="key-item">
+      <div class="key-item-name">${escHtml(f.label)}</div>
+      <div class="key-item-value">${escHtml(f.value)}</div>
+    </div>`;
+  });
+  h+='</div>';
+  const hidden=state.baselineFields.filter(f=>f.hidden);
+  if(hidden.length) h+=`<p style="font-size:.75rem;color:var(--dim);margin-top:.6rem">Skrytá pole: ${hidden.map(f=>f.label).join(', ')} — <button class="btn-ghost" onclick="showAllFields()">zobrazit vše</button></p>`;
+  keyBody.innerHTML=h;
+  state.keyGenerated=true;
+  document.getElementById('key-panel').open=true;
+  rebuildAllMatching();
+  save();
+  showToast('Klíč baseline vygenerován.');
+}
+
+// ═══════════════════════════════════════════════
+// STATEMENTS
+// ═══════════════════════════════════════════════
+function addStatement(){
+  const id = state.nextId++;
+  state.statements.push({id, name:'', role:'svedek', text:'', notes:'', disorders:[], matching:{}, collapsed:false});
+  renderStatement(id);
+  document.getElementById('btn-map').style.display='inline-block';
+  updateEmptyState();
+  save();
+}
+
+function renderStatement(id){
+  const st = state.statements.find(s=>s.id===id);
+  if(!st)return;
+  const container = document.getElementById('statements-area');
+  const existing = document.getElementById(`stmt-${id}`);
+  if(existing) existing.remove();
+  const card = document.createElement('div');
+  card.className='stmt-card';
+  card.id=`stmt-${id}`;
+  card.innerHTML = buildStatementHTML(st);
+  setupDrag(card, id);
+  container.appendChild(card);
+  restoreMatching(id);
+  updateStatementStatus(id);
+}
+
+function buildStatementHTML(st){
+  const roleLabel=ROLE_LABELS[st.role]||st.role;
+  const roleClass=ROLE_CLASS[st.role]||'role-jiny';
+  const bodyDisplay=st.collapsed?'display:none':'';
+  const matchHTML=buildMatchingHTML(st.id);
+  const disorderTags=st.disorders.length
+    ? st.disorders.map(d=>`<span class="dsm-tag">${d}</span>`).join('') : '';
+  return `
+  <div class="stmt-header" onclick="toggleStatement(${st.id})">
+    <span class="drag-handle" draggable="false" onclick="event.stopPropagation()">⠿</span>
+    <span class="stmt-title" id="stitle-${st.id}">${escHtml(st.name)||'Nová výpověď'}</span>
+    <span class="stmt-role-badge ${roleClass}" id="srole-${st.id}">${roleLabel}</span>
+    <span class="stmt-status" id="sstatus-${st.id}"></span>
+    <button class="btn-danger" onclick="event.stopPropagation();deleteStatement(${st.id})">✕</button>
+  </div>
+  <div class="stmt-body" id="sbody-${st.id}" style="${bodyDisplay}">
+    <div class="stmt-row">
+      <input class="stmt-input stmt-name" type="text" id="sname-${st.id}"
+        placeholder="Jméno / označení osoby" value="${escHtml(st.name)}"
+        oninput="updateStatementMeta(${st.id})">
+      <select class="stmt-role-sel" id="srolesel-${st.id}" onchange="updateStatementMeta(${st.id})">
+        ${Object.entries(ROLE_LABELS).map(([k,v])=>`<option value="${k}" ${st.role===k?'selected':''}>${v}</option>`).join('')}
+      </select>
+      <button class="btn btn-sm btn-outline" onclick="addAnotherEntry(${st.id})">+ Další zápis</button>
+    </div>
+
+    <div class="stmt-section">
+      <label>Text výpovědi</label>
+      <div class="text-upload-bar">
+        <label class="btn btn-sm btn-outline" style="cursor:pointer">
+          📎 Nahrát soubor
+          <input type="file" accept=".txt,.md,.csv" style="display:none" onchange="loadFile(${st.id},this)">
+        </label>
+        <button class="btn btn-sm" onclick="detectDisorders(${st.id})">🔍 Detekovat poruchy</button>
+        <button class="btn btn-sm btn-outline" id="edit-btn-${st.id}" style="display:none" onclick="editText(${st.id})">✏ Upravit text</button>
+        <span class="upload-hint">(.txt, .md)</span>
+      </div>
+      <textarea class="stmt-textarea" id="stxt-${st.id}"
+        placeholder="Vložte nebo napište text výpovědi…"
+        oninput="updateStatementText(${st.id})"
+        ondragstart="event.stopPropagation()"
+        ondragover="event.stopPropagation()">${escHtml(st.text)}</textarea>
+      <div class="highlighted-view" id="shl-${st.id}"></div>
+      <div class="disorder-legend" id="sleg-${st.id}"></div>
+      ${disorderTags?`<div class="disorder-summary" id="sdsum-${st.id}">${disorderTags}</div>`:`<div class="disorder-summary" id="sdsum-${st.id}"></div>`}
+    </div>
+
+    <div class="stmt-section">
+      <label>📋 Porovnání s baseline</label>
+      ${matchHTML}
+    </div>
+
+    <div class="stmt-section">
+      <label>Poznámky</label>
+      <textarea class="notes-area" id="snotes-${st.id}"
+        placeholder="Doplňující pozorování, kontext, otázky…"
+        oninput="updateStatementNotes(${st.id})"
+        ondragstart="event.stopPropagation()">${escHtml(st.notes)}</textarea>
+    </div>
+  </div>`;
+}
+
+// Matching — only filled baseline fields, inside collapsible details
+function buildMatchingHTML(id){
+  const fields = getFilledBaselineFields();
+  if(!fields.length) return `<p class="match-empty">Nejprve vyplňte a uložte baseline — zobrazí se jen vyplněná pole.</p>`;
+  const st = state.statements.find(s=>s.id===id);
+  // Count already set
+  const setCount = fields.filter(f=>st&&st.matching[f.id]&&st.matching[f.id].val).length;
+  return `
+  <details class="matching-panel" ${setCount>0?'open':''}>
+    <summary>Porovnat s baseline <span style="margin-left:.3rem;font-weight:normal">(${setCount}/${fields.length} vyplněno)</span></summary>
+    <div class="matching-grid" id="smat-${id}">
+      ${fields.map(f=>`
+      <div class="match-row">
+        <span class="match-field-name">${escHtml(f.label)}</span>
+        <div class="match-btns">
+          <button class="match-btn" id="mb-${id}-${f.id}-sedi"   onclick="setMatch(${id},'${f.id}','sedi')">✓ sedí</button>
+          <button class="match-btn" id="mb-${id}-${f.id}-nesedi" onclick="setMatch(${id},'${f.id}','nesedi')">✗ nesedí</button>
+          <button class="match-btn" id="mb-${id}-${f.id}-chybi"  onclick="setMatch(${id},'${f.id}','chybi')">? chybí</button>
+        </div>
+        <input class="match-note" type="text" id="mn-${id}-${f.id}"
+          placeholder="poznámka…" oninput="updateMatchNote(${id},'${f.id}',this.value)"
+          ondragstart="event.stopPropagation()">
+      </div>`).join('')}
+    </div>
+  </details>`;
+}
+
+function restoreMatching(id){
+  const st=state.statements.find(s=>s.id===id);
+  if(!st)return;
+  Object.entries(st.matching).forEach(([fid,m])=>{
+    if(m.val){
+      const btn=document.getElementById(`mb-${id}-${fid}-${m.val}`);
+      if(btn)btn.className='match-btn '+m.val;
+    }
+    const noteEl=document.getElementById(`mn-${id}-${fid}`);
+    if(noteEl&&m.note)noteEl.value=m.note;
+  });
+}
+
+function setMatch(stmtId,fieldId,val){
+  const st=state.statements.find(s=>s.id===stmtId);
+  if(!st)return;
+  if(!st.matching[fieldId])st.matching[fieldId]={val:'',note:''};
+  const prev=st.matching[fieldId].val;
+  const newVal=prev===val?'':val;
+  st.matching[fieldId].val=newVal;
+  ['sedi','nesedi','chybi'].forEach(v=>{
+    const btn=document.getElementById(`mb-${stmtId}-${fieldId}-${v}`);
+    if(btn)btn.className='match-btn'+(v===newVal?' '+v:'');
+  });
+  // Update matching panel summary count
+  const fields=getFilledBaselineFields();
+  const filled=fields.filter(f=>st.matching[f.id]&&st.matching[f.id].val).length;
+  const sum=document.querySelector(`#sbody-${stmtId} .matching-panel summary`);
+  if(sum)sum.innerHTML=`Porovnat s baseline <span style="margin-left:.3rem;font-weight:normal">(${filled}/${fields.length} vyplněno)</span>`;
+  updateStatementStatus(stmtId);
+  save();
+}
+
+function updateMatchNote(stmtId,fieldId,val){
+  const st=state.statements.find(s=>s.id===stmtId);
+  if(!st)return;
+  if(!st.matching[fieldId])st.matching[fieldId]={val:'',note:''};
+  st.matching[fieldId].note=val; save();
+}
+
+function updateStatementMeta(id){
+  const st=state.statements.find(s=>s.id===id);
+  if(!st)return;
+  st.name=document.getElementById(`sname-${id}`)?.value||'';
+  st.role=document.getElementById(`srolesel-${id}`)?.value||'svedek';
+  document.getElementById(`stitle-${id}`).textContent=st.name||'Výpověď';
+  const roleEl=document.getElementById(`srole-${id}`);
+  if(roleEl){roleEl.textContent=ROLE_LABELS[st.role]||st.role; roleEl.className=`stmt-role-badge ${ROLE_CLASS[st.role]||'role-jiny'}`;}
+  save();
+}
+function updateStatementText(id){ const st=state.statements.find(s=>s.id===id); if(st){st.text=document.getElementById(`stxt-${id}`)?.value||'';save();} }
+function updateStatementNotes(id){ const st=state.statements.find(s=>s.id===id); if(st){st.notes=document.getElementById(`snotes-${id}`)?.value||'';save();} }
+
+function updateStatementStatus(id){
+  const st=state.statements.find(s=>s.id===id);
+  const el=document.getElementById(`sstatus-${id}`);
+  if(!st||!el)return;
+  const filled=Object.values(st.matching).filter(m=>m.val).length;
+  const total=getFilledBaselineFields().length;
+  if(filled>0){ el.textContent=`${filled}/${total}`; el.className=filled===total?'stmt-status done':'stmt-status'; }
+  else{ el.textContent=''; el.className='stmt-status'; }
+}
+
+function toggleStatement(id){
+  const body=document.getElementById(`sbody-${id}`);
+  if(!body)return;
+  const st=state.statements.find(s=>s.id===id);
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'';
+  if(st)st.collapsed=isOpen;
+  save();
+}
+
+function deleteStatement(id){
+  if(!confirm('Smazat tuto výpověď?'))return;
+  state.statements=state.statements.filter(s=>s.id!==id);
+  document.getElementById(`stmt-${id}`)?.remove();
+  updateEmptyState();
+  if(!state.statements.length)document.getElementById('btn-map').style.display='none';
+  save();
+}
+
+function addAnotherEntry(originalId){
+  const orig=state.statements.find(s=>s.id===originalId);
+  const id=state.nextId++;
+  state.statements.push({id, name:(orig?.name||'')+' (2)', role:orig?.role||'svedek', text:'', notes:'', disorders:[], matching:{}, collapsed:false});
+  renderStatement(id);
+  save();
+  showToast('Přidán další zápis.');
+}
+
+function collapseAll(){ state.statements.forEach(s=>{const b=document.getElementById(`sbody-${s.id}`);if(b){b.style.display='none';s.collapsed=true;}}); save(); }
+function expandAll(){   state.statements.forEach(s=>{const b=document.getElementById(`sbody-${s.id}`);if(b){b.style.display='';s.collapsed=false;}}); save(); }
+
+function updateEmptyState(){
+  const area=document.getElementById('statements-area');
+  const hasCards=area.querySelector('.stmt-card');
+  let empty=area.querySelector('.empty-msg');
+  if(!hasCards){
+    if(!empty){empty=document.createElement('p');empty.className='empty-msg';empty.style='color:var(--dim);font-size:.85rem;font-style:italic';area.appendChild(empty);}
+    empty.textContent='Zatím žádné výpovědi. Klikněte na „Přidat výpověď".';
+  } else { if(empty)empty.remove(); }
+}
+
+function rebuildAllMatching(){
+  state.statements.forEach(st=>{
+    const body=document.getElementById(`sbody-${st.id}`);
+    if(!body)return;
+    const sec=body.querySelector('.stmt-section:nth-child(3)');
+    if(sec){
+      const matchDiv=sec.querySelector('.matching-panel,p.match-empty');
+      if(matchDiv)matchDiv.outerHTML=buildMatchingHTML(st.id);
+      else sec.insertAdjacentHTML('beforeend',buildMatchingHTML(st.id));
+      restoreMatching(st.id);
+      updateStatementStatus(st.id);
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════
+// FILE UPLOAD
+// ═══════════════════════════════════════════════
+function loadFile(id,input){
+  const file=input.files[0]; if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const txt=e.target.result;
+    const area=document.getElementById(`stxt-${id}`);
+    if(area){area.value=txt; updateStatementText(id);}
+    showToast('Načteno: '+file.name);
+  };
+  reader.readAsText(file,'utf-8');
+  input.value='';
+}
+
+// ═══════════════════════════════════════════════
+// DISORDER DETECTION
+// ═══════════════════════════════════════════════
+function detectDisorders(id){
+  const area=document.getElementById(`stxt-${id}`);
+  const hlDiv=document.getElementById(`shl-${id}`);
+  const legDiv=document.getElementById(`sleg-${id}`);
+  const editBtn=document.getElementById(`edit-btn-${id}`);
+  const dsumDiv=document.getElementById(`sdsum-${id}`);
+  if(!area||!hlDiv)return;
+  const text=area.value.trim();
+  if(!text){showToast('Vložte nejprve text výpovědi.');return;}
+
+  const sentences=text.split(/(?<=[.!?…])\s+/).filter(s=>s.trim().length>3);
+  const avgLen=sentences.reduce((s,t)=>s+t.split(/\s+/).length,0)/Math.max(sentences.length,1);
+  const allWords=text.toLowerCase().replace(/<[^>]+>/g,'').split(/\s+/);
+  const wordCount={};
+  allWords.forEach(w=>{if(w.length>4)wordCount[w]=(wordCount[w]||0)+1;});
+
+  const foundIds=new Set();
+  let marked=text;
+
+  // Keyword-based
+  PORUCHY.forEach(p=>{
+    if(!p.patterns.length)return;
+    p.patterns.forEach(pat=>{
+      const re=new RegExp(escapeReg(pat),'gi');
+      if(re.test(marked)){
+        foundIds.add(p.id);
+        marked=marked.replace(re,m=>`<span class="d-${p.id}" title="${p.label}: ${p.desc}">${m}</span>`);
+      }
+    });
+  });
+
+  // Fixation: repeated words
+  Object.entries(wordCount).forEach(([w,cnt])=>{
+    if(cnt>=2){
+      foundIds.add('fixace');
+      const re=new RegExp(`\\b${escapeReg(w)}\\b`,'gi');
+      const fix=PORUCHY.find(p=>p.id==='fixace');
+      marked=marked.replace(re,m=>`<span class="d-fixace" title="Fixace: '${w}' se opakuje ${cnt}×">${m}</span>`);
+    }
+  });
+
+  // Role shift (algoritmicky)
+  const FP=/\b(já|mě|mi|mně|jsem|mám|chci)\b/i;
+  const TP=/\b(on|ona|oni|ho|ji|mu|jej|jeho|její)\b/i;
+  let pov='';
+  sentences.forEach(s=>{
+    const fp=FP.test(s),tp=TP.test(s);
+    const cur=fp?'fp':tp?'tp':'';
+    if(cur&&pov&&cur!==pov)foundIds.add('role');
+    if(cur)pov=cur;
+  });
+
+  // Tempo / délka (algoritmicky)
+  if(sentences.length>=3){
+    const lens=sentences.map(s=>s.split(/\s+/).length);
+    const std=Math.sqrt(lens.map(l=>(l-avgLen)**2).reduce((a,b)=>a+b,0)/lens.length);
+    if(std>4){foundIds.add('delka');foundIds.add('tempo');}
+  }
+
+  hlDiv.innerHTML=marked;
+  hlDiv.style.display='block';
+  area.style.display='none';
+  if(editBtn)editBtn.style.display='inline-block';
+
+  const found=PORUCHY.filter(p=>foundIds.has(p.id));
+  legDiv.innerHTML=found.length
+    ? found.map(p=>`<span class="legend-item" style="background:${p.color};color:${p.textColor}">${p.label}</span>`).join('')
+    : '<span style="font-size:.78rem;color:var(--dim)">Žádné poruchy detekovány automaticky.</span>';
+
+  const st=state.statements.find(s=>s.id===id);
+  if(st){
+    st.disorders=found.map(p=>p.label);
+    if(dsumDiv)dsumDiv.innerHTML=found.map(p=>`<span class="dsm-tag">${p.label}</span>`).join('');
+    save();
+  }
+}
+
+function editText(id){
+  const area=document.getElementById(`stxt-${id}`);
+  const hlDiv=document.getElementById(`shl-${id}`);
+  const editBtn=document.getElementById(`edit-btn-${id}`);
+  const legDiv=document.getElementById(`sleg-${id}`);
+  if(area)area.style.display='';
+  if(hlDiv)hlDiv.style.display='none';
+  if(editBtn)editBtn.style.display='none';
+  if(legDiv)legDiv.innerHTML='';
+}
+
+function escapeReg(s){return s.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');}
+
+// ═══════════════════════════════════════════════
+// DRAG & DROP
+// ═══════════════════════════════════════════════
+let dragId=null;
+function setupDrag(card,id){
+  card.addEventListener('dragstart',e=>{
+    // Only drag from the handle
+    if(!e.target.classList.contains('drag-handle')){e.preventDefault();return;}
+    dragId=id; card.style.opacity='.4'; e.dataTransfer.effectAllowed='move';
+  });
+  card.addEventListener('dragend',()=>{
+    dragId=null; card.style.opacity='';
+    document.querySelectorAll('.stmt-card').forEach(c=>c.classList.remove('drag-over'));
+  });
+  card.addEventListener('dragover',e=>{
+    e.preventDefault();
+    if(dragId!==null&&dragId!==id)card.classList.add('drag-over');
+  });
+  card.addEventListener('dragleave',()=>card.classList.remove('drag-over'));
+  card.addEventListener('drop',e=>{
+    e.preventDefault(); card.classList.remove('drag-over');
+    if(dragId===null||dragId===id)return;
+    const area=document.getElementById('statements-area');
+    const dragCard=document.getElementById(`stmt-${dragId}`);
+    const targetCard=document.getElementById(`stmt-${id}`);
+    if(!dragCard||!targetCard)return;
+    const cards=[...area.querySelectorAll('.stmt-card')];
+    const di=cards.indexOf(dragCard), ti=cards.indexOf(targetCard);
+    if(di<ti)area.insertBefore(dragCard,targetCard.nextSibling);
+    else area.insertBefore(dragCard,targetCard);
+    const si=state.statements.findIndex(s=>s.id===dragId);
+    const ti2=state.statements.findIndex(s=>s.id===id);
+    const [moved]=state.statements.splice(si,1);
+    state.statements.splice(ti2,0,moved);
+    save();
+  });
+}
+
+// ═══════════════════════════════════════════════
+// BUILD MAP
+// ═══════════════════════════════════════════════
+function buildMap(){
+  const fields=getFilledBaselineFields();
+  const stmts=state.statements.filter(s=>s.name||s.text);
+  const section=document.getElementById('results-section');
+  const body=document.getElementById('results-body');
+  if(!stmts.length){showToast('Nejprve vyplňte alespoň jednu výpověď.');return;}
+
+  const fieldStats={};
+  let shodyCount=0, rozporyCount=0, slepaCount=0;
+  fields.forEach(f=>{
+    const sedi=stmts.filter(s=>s.matching[f.id]?.val==='sedi').length;
+    const nesedi=stmts.filter(s=>s.matching[f.id]?.val==='nesedi').length;
+    const chybi=stmts.filter(s=>s.matching[f.id]?.val==='chybi').length;
+    const filled=sedi+nesedi+chybi;
+    let type='neurcite';
+    if(!filled){slepaCount++;type='slepo';}
+    else if(sedi>0&&nesedi>0){rozporyCount++;type='rozpor';}
+    else if(sedi===filled){shodyCount++;type='shoda';}
+    else if(chybi===filled){slepaCount++;type='slepo';}
+    fieldStats[f.id]={sedi,nesedi,chybi,filled,type,label:f.label};
+  });
+
+  const neVyplneno=Math.max(0,fields.length-shodyCount-rozporyCount-slepaCount);
+  const chartData=[
+    {label:'Shody',      value:shodyCount,   color:'#2a7a3a'},
+    {label:'Rozpory',    value:rozporyCount, color:'#c0392b'},
+    {label:'Slepá místa',value:slepaCount,   color:'#888'},
+    {label:'Nevyplněno', value:neVyplneno,   color:'#ddd'},
+  ];
+
+  let h='';
+
+  // Chart
+  h+=`<div class="chart-row">
+    <canvas id="case-chart" width="160" height="160"></canvas>
+    <div class="chart-legend">
+      ${chartData.map(d=>`<div class="leg-row"><div class="leg-dot" style="background:${d.color}"></div><span>${d.label}: <strong>${d.value}</strong></span></div>`).join('')}
+      <div style="font-size:.75rem;color:var(--dim);margin-top:.4rem">Výpovědí: ${stmts.length}<br>Polí baseline: ${fields.length}</div>
+    </div>
+  </div>`;
+
+  // Table
+  h+=`<div class="sekce"><h3>Srovnávací tabulka</h3>
+  <table class="map-table"><tr>
+    <th>Pole baseline</th>
+    ${stmts.map(s=>`<th>${escHtml(s.name||'?')}<br><span style="font-weight:normal;font-size:.7rem">${ROLE_LABELS[s.role]||s.role}</span></th>`).join('')}
+    <th>Typ</th>
+  </tr>`;
+  fields.forEach(f=>{
+    const fs=fieldStats[f.id];
+    const typLabel={shoda:'✓ Shoda',rozpor:'⚑ Rozpor',slepo:'◯ Slepé místo',neurcite:'–'}[fs.type]||'–';
+    const typColor={shoda:'#2a7a3a',rozpor:'#c0392b',slepo:'#888',neurcite:'#ccc'}[fs.type];
+    h+=`<tr><td><strong>${escHtml(f.label)}</strong>
+      <span class="field-detail-toggle" onclick="toggleFieldDetail('fd-${f.id}')">▸ detail</span>
+      <div class="field-detail-body" id="fd-${f.id}">
+        <table style="width:100%;font-size:.74rem;margin-top:.3rem">
+        ${stmts.map(s=>{
+          const m=s.matching[f.id];
+          return `<tr>
+            <td style="padding:.2rem .4rem;border-bottom:1px solid var(--faint)">${escHtml(s.name||'?')}</td>
+            <td style="padding:.2rem .4rem;border-bottom:1px solid var(--faint)">${m?.val?{sedi:'✓ sedí',nesedi:'✗ nesedí',chybi:'? chybí'}[m.val]:'—'}</td>
+            <td style="padding:.2rem .4rem;border-bottom:1px solid var(--faint);color:var(--dim);font-style:italic">${escHtml(m?.note||'')}</td>
+          </tr>`;}).join('')}
+        </table>
+      </div>
+    </td>`;
+    stmts.forEach(s=>{
+      const m=s.matching[f.id];
+      const val=m?.val||'';
+      const cls={sedi:'cell-sedi',nesedi:'cell-nesedi',chybi:'cell-chybi'}[val]||'';
+      const lbl={sedi:'✓',nesedi:'✗',chybi:'?'}[val]||'—';
+      const note=m?.note?`<span style="font-size:.7rem;display:block;color:inherit">${escHtml(m.note)}</span>`:'';
+      h+=`<td class="${cls}">${lbl}${note}</td>`;
+    });
+    h+=`<td style="font-size:.78rem;font-weight:bold;color:${typColor}">${typLabel}</td></tr>`;
+  });
+  h+=`</table></div>`;
+
+  // Alerts
+  const rozpory=Object.entries(fieldStats).filter(([,v])=>v.type==='rozpor');
+  const shody=Object.entries(fieldStats).filter(([,v])=>v.type==='shoda');
+  const slepa=Object.entries(fieldStats).filter(([,v])=>v.type==='slepo');
+
+  if(rozpory.length){
+    h+=`<div class="sekce"><h3>⚑ Rozpory</h3>`;
+    rozpory.forEach(([fid,fs])=>{
+      const sw=stmts.filter(s=>s.matching[fid]?.val==='sedi').map(s=>s.name||'?');
+      const nw=stmts.filter(s=>s.matching[fid]?.val==='nesedi').map(s=>s.name||'?');
+      h+=`<div class="alert-item alert-rozpor"><strong>${escHtml(fs.label)}</strong> — Sedí: ${sw.map(escHtml).join(', ')||'—'} | Nesedí: ${nw.map(escHtml).join(', ')||'—'}</div>`;
+    });
+    h+=`</div>`;
+  }
+  if(shody.length){
+    h+=`<div class="sekce"><h3>✓ Shody</h3>`;
+    shody.forEach(([,fs])=>h+=`<div class="alert-item alert-shoda"><strong>${escHtml(fs.label)}</strong> — všichni se shodují</div>`);
+    h+=`</div>`;
+  }
+  if(slepa.length){
+    h+=`<div class="sekce"><h3>◯ Slepá místa</h3><p style="font-size:.83rem;margin-bottom:.6rem">Pole kde informace chybí nebo nejsou vyplněna.</p>`;
+    slepa.forEach(([,fs])=>h+=`<div class="alert-item alert-slepo"><strong>${escHtml(fs.label)}</strong></div>`);
+    h+=`</div>`;
+  }
+
+  // Disorders
+  if(stmts.some(s=>s.disorders.length>0)){
+    h+=`<div class="sekce"><h3>🔍 Detekované jazykové poruchy</h3>`;
+    stmts.forEach(s=>{
+      if(!s.disorders.length)return;
+      h+=`<div style="margin-bottom:.5rem;font-size:.85rem"><strong>${escHtml(s.name||'?')}</strong> — ${s.disorders.map(d=>`<span class="dsm-tag">${escHtml(d)}</span>`).join(' ')}</div>`;
+    });
+    h+=`</div>`;
+  }
+
+  h+=`<div class="btn-row"><button class="btn btn-outline" onclick="window.print()">⎙ Vytisknout</button></div>`;
+  body.innerHTML=h;
+  section.style.display='block';
+  section.scrollIntoView({behavior:'smooth'});
+  requestAnimationFrame(()=>drawDonut(chartData));
+}
+
+function drawDonut(data){
+  const canvas=document.getElementById('case-chart');
+  if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const cx=80,cy=80,r=65,inner=38;
+  ctx.clearRect(0,0,160,160);
+  const total=data.reduce((s,d)=>s+(d.value||0),0)||1;
+  let angle=-Math.PI/2;
+  data.forEach(d=>{
+    if(!d.value)return;
+    const sweep=(d.value/total)*Math.PI*2;
+    ctx.beginPath();ctx.moveTo(cx,cy);ctx.arc(cx,cy,r,angle,angle+sweep);ctx.closePath();
+    ctx.fillStyle=d.color;ctx.fill();
+    angle+=sweep;
+  });
+  ctx.beginPath();ctx.arc(cx,cy,inner,0,Math.PI*2);
+  ctx.fillStyle=document.body.classList.contains('dark')?'#141414':'#fff';ctx.fill();
+  ctx.fillStyle=document.body.classList.contains('dark')?'#e8e0d0':'#111';
+  ctx.font='bold 13px Georgia,serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText(data.reduce((s,d)=>s+d.value,0),cx,cy);
+}
+
+function toggleFieldDetail(id){
+  const el=document.getElementById(id);
+  if(el)el.style.display=el.style.display==='block'?'none':'block';
+}
+
+// ═══════════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════════
+function save(){
+  state.baselineFields.forEach(f=>{const el=document.getElementById(`bv-${f.id}`);if(el)f.value=el.value;});
+  state.customFields.forEach(cf=>{const el=document.getElementById(`bcv-${cf.id}`);if(el)cf.value=el.value;});
+  state.caseName=document.getElementById('case-name')?.value||'';
+  state.statements.forEach(s=>{
+    const t=document.getElementById(`stxt-${s.id}`);
+    const n=document.getElementById(`snotes-${s.id}`);
+    if(t)s.text=t.value; if(n)s.notes=n.value;
+  });
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify(state));
+    const bar=document.getElementById('autosave-bar');
+    const now=new Date();
+    if(bar)bar.textContent=`Uloženo ${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')} — data jen v prohlížeči.`;
+  }catch(e){}
+}
+
+function load(){
+  try{
+    const raw=localStorage.getItem(SAVE_KEY);
+    if(!raw)return;
+    const saved=JSON.parse(raw);
+    if(saved.baselineFields)state.baselineFields=saved.baselineFields;
+    if(saved.customFields)state.customFields=saved.customFields;
+    if(saved.statements)state.statements=saved.statements;
+    if(saved.nextId)state.nextId=saved.nextId;
+    if(saved.caseName)state.caseName=saved.caseName;
+    if(saved.dark!==undefined)state.dark=saved.dark;
+  }catch(e){}
+}
+
+function exportJSON(){
+  save();
+  const blob=new Blob([JSON.stringify(state,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download=`pripad-${(state.caseName||'export').replace(/\s+/g,'-')}-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();URL.revokeObjectURL(url);
+}
+
+function importJSON(){
+  const input=document.createElement('input');
+  input.type='file';input.accept='.json';
+  input.onchange=async e=>{
+    try{
+      const text=await e.target.files[0].text();
+      const data=JSON.parse(text);
+      Object.assign(state,data);
+      initRender();
+      showToast('Import dokončen.');
+    }catch(e){showToast('Chyba při importu.');}
+  };
+  input.click();
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+function initRender(){
+  document.getElementById('case-name').value=state.caseName||'';
+  applyTheme();
+  renderBaselineFields();
+  document.getElementById('statements-area').innerHTML='';
+  state.statements.forEach(s=>renderStatement(s.id));
+  updateEmptyState();
+  if(state.statements.length)document.getElementById('btn-map').style.display='inline-block';
+  if(state.keyGenerated)generateKey();
+}
+
+function escHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+let toastTimer;
+function showToast(msg){
+  clearTimeout(toastTimer);
+  let t=document.getElementById('toast');
+  if(!t){t=document.createElement('div');t.id='toast';t.style='position:fixed;bottom:1.2rem;right:1.2rem;background:var(--ink);color:var(--paper);font-family:Georgia,serif;font-size:.82rem;padding:.5rem 1rem;border-radius:3px;z-index:9999;transition:opacity .3s';document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';
+  toastTimer=setTimeout(()=>t.style.opacity='0',2500);
+}
+
+document.addEventListener('DOMContentLoaded',()=>{load();initRender();});
+</script>
+</body>
+</html>
