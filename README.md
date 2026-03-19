@@ -23,6 +23,14 @@ Offline nástroj pro strukturovanou analýzu výpovědí. Pomáhá vyšetřovate
 - [jazykový **porovnávač** textu](doma/porovnavac.html)
 
 ---
+ 
+- [eticky kodex](doma/eticky_kodex.html)
+- [manual](doma/manual.html)
+- [zpetna_vazba](doma/zpetna_vazba.html)
+- [licence](doma/licence.html)
+- [argumenty](doma/argumenty.html)
+- 
+--- 
 
 ## 🧠 Co to je a proč to vzniklo
 
