@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forenzní jazykové mapování · Chceš myš?</title>
+    <style>
+        /* ===== ČISTÝ ČERNOBÍLÝ STYL (Repodom) ===== */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        :root {
+            --bg: #ffffff;
+            --fg: #111111;
+            --muted: #555555;
+            --border: #d0d0d0;
+            --serif: Georgia, 'Times New Roman', serif;
+            --sans: 'Helvetica Neue', Arial, sans-serif;
+        }
+        body {
+            background: var(--bg);
+            color: var(--fg);
+            font-family: var(--sans);
+            font-size: 16px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            padding: 2rem 1.5rem;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+        h1, h2, h3 {
+            font-family: var(--serif);
+            font-weight: 400;
+            letter-spacing: -0.01em;
+        }
+        h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid var(--fg);
+            padding-bottom: 0.5rem;
+        }
+        h2 {
+            font-size: 1.8rem;
+            margin: 2.5rem 0 1rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0.3rem;
+        }
+        h3 {
+            font-size: 1.2rem;
+            margin: 1.5rem 0 0.8rem;
+            font-weight: 600;
+            font-family: var(--sans);
+            letter-spacing: 0.02em;
+        }
+        p {
+            margin-bottom: 1rem;
+            color: var(--fg);
+        }
+        a {
+            color: var(--fg);
+            text-underline-offset: 2px;
+        }
+        a:hover {
+            color: var(--muted);
+        }
+        .subtitle {
+            font-size: 1.1rem;
+            color: var(--muted);
+            margin-bottom: 2rem;
+        }
+        /* karty / boxíky */
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+        .card {
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            background: var(--bg);
+            transition: box-shadow 0.2s;
+        }
+        .card:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .card h4 {
+            font-family: var(--serif);
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin-bottom: 0.5rem;
+        }
+        .card p {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 0.8rem;
+        }
+        .card a {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            text-decoration: none;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2px;
+        }
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        .step {
+            flex: 1;
+            min-width: 200px;
+            border-left: 2px solid var(--fg);
+            padding-left: 1.2rem;
+        }
+        .step-number {
+            font-family: var(--serif);
+            font-size: 2rem;
+            color: var(--muted);
+            display: block;
+        }
+        .btn {
+            display: inline-block;
+            padding: 0.6rem 2rem;
+            border: 1.5px solid var(--fg);
+            color: var(--fg);
+            text-decoration: none;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background: var(--fg);
+            color: var(--bg);
+        }
+        footer {
+            margin-top: 4rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--border);
+            font-size: 0.8rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        footer a {
+            color: var(--muted);
+        }
+        code {
+            background: #f5f5f5;
+            padding: 0.2em 0.4em;
+            font-family: monospace;
+            font-size: 0.9em;
+            border: 1px solid var(--border);
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Forenzní jazykové mapování</h1>
+    <p class="subtitle">Detekce 12 typů jazykových anomálií · Myší klíče · Kognitivní mapa</p>
+
+    <p>
+        Tento nástroj slouží k <strong>analýze textu</strong> – ať už jde o přepis rozhovoru, zápis z porady, terapeutické sezení nebo vlastní tvůrčí psaní.
+        Nehledá obsah, ale <strong>strukturální poruchy</strong> v jazyce: mezery, přeskoky, fixace, rozpad syntaxe a další.
+        Výsledkem je <strong>kognitivní mapa</strong> – vizuální otisk, který ukazuje, jak text „dýchá“ a kde má slabiny.
+    </p>
+
+    <h2>🔍 Jak to funguje</h2>
+    <div class="steps">
+        <div class="step">
+            <span class="step-number">01</span>
+            <h3>Vyplňte baseline</h3>
+            <p>Základní údaje o případu – datum, kontext, účel analýzy. Můžete přidat vlastní pole.</p>
+        </div>
+        <div class="step">
+            <span class="step-number">02</span>
+            <h3>Vložte text</h3>
+            <p>Přepište nebo zkopírujte text do zápisníku. Nástroj automaticky detekuje 12 typů jazykových poruch.</p>
+        </div>
+        <div class="step">
+            <span class="step-number">03</span>
+            <h3>Prohlédněte mapu</h3>
+            <p>Kognitivní mapa zobrazí detekované vzorce. Porovnávač umožní srovnat více výpovědí.</p>
+        </div>
+    </div>
+
+    <a href="./doma/../../../Chces_MYS-_forezni_jazykove_mapovani/index.html" class="btn">▶ Spustit nástroj</a>
+
+    <h2>📁 Nástroje a dokumentace</h2>
+    <div class="grid">
+        <div class="card">
+            <h4>🧩 Detektor vzorců</h4>
+            <p>Automatická detekce jazykových anomálií podle 12 klíčů.</p>
+            <a href="./doma/detektor_vzorcu_v2.html">Otevřít →</a>
+        </div>
+        <div class="card">
+            <h4>⚖️ Porovnávač</h4>
+            <p>Srovnání dvou výpovědí a zvýraznění rozdílů.</p>
+            <a href="./doma/porovnavac.html">Otevřít →</a>
+        </div>
+        <div class="card">
+            <h4>📚 Manuál</h4>
+            <p>Podrobný popis metodiky, jednotlivých poruch a jejich interpretace.</p>
+            <a href="./doma/manual.html">Číst →</a>
+        </div>
+        <div class="card">
+            <h4>💡 Modelové scénáře</h4>
+            <p>Příklady použití v praxi – týmová komunikace, terapie, investigace.</p>
+            <a href="./doma/modelove_scenare.html">Prozkoumat →</a>
+        </div>
+        <div class="card">
+            <h4>📜 Etický kodex</h4>
+            <p>Zásady práce s citlivými daty a výpověďmi.</p>
+            <a href="./doma/eticky-kodex.html">Číst →</a>
+        </div>
+        <div class="card">
+            <h4>🗣️ Argumenty</h4>
+            <p>Proč používat forenzní mapování – vysvětlení a obhajoba metody.</p>
+            <a href="./doma/argumenty.html">Číst →</a>
+        </div>
+        <div class="card">
+            <h4>📊 Zpětná vazba</h4>
+            <p>Podělte se o zkušenosti nebo nahlaste chybu.</p>
+            <a href="./doma/zpetna_vazba.html">Vyplnit →</a>
+        </div>
+        <div class="card">
+            <h4>⚖️ Licence</h4>
+            <p>Podmínky použití datasetu a nástrojů.</p>
+            <a href="./doma/licence.html">Zobrazit →</a>
+        </div>
+    </div>
+
+    <h2>🐁 Myší klíče a fenomény</h2>
+    <p>
+        Základem analýzy je <strong>12 Myších klíčů</strong> – univerzálních jazykových poruch, které se projevují napříč všemi fenomény (zvířecími pohádkami).
+        Každý fenomén (Myš, Kocour, Ryba, Netopýr…) pojmenovává tytéž poruchy svým vlastním poetickým jazykem.
+    </p>
+    <p>
+        Například „Mezera / výpadek“ je v Myši „skulina mezi slovy“, v Kocourovi „nedokončená věta“ a v Rybě „ticho, které nese obsah“.
+        Více o fenoménech najdete v hlavním rozcestníku <a href="https://artmisanovak-prog.github.io/Fenomeny_Kreativni_Slovnik_Mezer_Chces_Mys/">Chceš myš?</a>.
+    </p>
+
+    <h2>📖 Rychlý vstup do hlavního nástroje</h2>
+    <p>
+        Pokud už metodu znáte a chcete rovnou začít s analýzou, použijte přímý odkaz na zápisník:
+        <br>
+        <a href="./index.html" class="btn" style="margin-top:0.5rem;">📝 Otevřít zápisník</a>
+    </p>
+
+    <footer>
+        <div>
+            <strong>Forenzní jazykové mapování</strong> · součást systému <a href="https://artmisanovak-prog.github.io/Fenomeny_Kreativni_Slovnik_Mezer_Chces_Mys/">Chceš myš?</a><br>
+            © 2026 Michaela Nováková · <a href="mailto:chcesmys@gmail.com">chcesmys@gmail.com</a>
+        </div>
+        <div>
+            <a href="./doma/licence.html">Licence</a> · <a href="./doma/zpetna_vazba.html">Zpětná vazba</a>
+        </div>
+    </footer>
+
+</body>
+</html>
