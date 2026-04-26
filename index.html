@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyzátor výpovědí · Chceš myš?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <style>
+        /* ===== ZÁKLAD (Slon styl) ===== */
+        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+        :root{
+            --bg:#0f0d0a;--s:#171410;--s2:#1e1a14;
+            --cream:#e8e0d0;--dim:rgba(232,224,208,.42);--dim2:rgba(232,224,208,.2);
+            --a:#c8903a;--a2:#8a6020;--ab:rgba(200,144,58,.1);--ab2:rgba(200,144,58,.22);
+            --border:rgba(200,144,58,.15);--border-hi:rgba(200,144,58,.32);
+            --serif:'Cormorant Garamond',Georgia,serif;--mono:'DM Mono',monospace;
+        }
+        html{scroll-behavior:smooth}
+        body{background:var(--bg);color:var(--cream);font-family:var(--mono);font-size:13px;line-height:1.8;-webkit-font-smoothing:antialiased}
+        a{color:inherit;text-decoration:none}
+        .wrap{max-width:780px;margin:0 auto;padding:0 24px}
+
+        /* NAVIGACE */
+        nav{position:sticky;top:0;z-index:100;border-bottom:1px solid var(--border);background:rgba(15,13,10,.94);backdrop-filter:blur(14px);padding:11px 24px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+        .nav-back{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--dim);transition:color .2s}
+        .nav-back:hover{color:var(--cream)}
+        .nav-links{display:flex;gap:4px;flex-wrap:wrap}
+        .nav-link{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--dim);padding:4px 9px;border:1px solid transparent;transition:all .12s}
+        .nav-link:hover{color:var(--cream);border-color:var(--border)}
+        .nav-link.active{color:var(--a);border-color:var(--border-hi)}
+
+        /* HERO */
+        .hero{padding:0 0 44px;border-bottom:1px solid var(--border)}
+        .hero-img{width:100%;max-height:460px;overflow:hidden;margin-bottom:28px;position:relative;text-align:center;background:var(--s);padding:60px 20px}
+        .hero-img img{width:180px;height:auto;display:block;margin:0 auto;filter:brightness(0) invert(1);transform:rotate(0deg);transition:transform 0.6s cubic-bezier(0.34,1.56,0.64,1);cursor:pointer}
+        .hero-img img.active{transform:rotate(-90deg)}
+        .hero-label{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--a);margin-bottom:12px}
+        h1{font-family:var(--serif);font-size:clamp(2.8rem,7vw,5rem);font-weight:300;line-height:1.0;margin-bottom:6px}
+        h1 em{font-style:italic;color:var(--a)}
+        .hero-veta{font-family:var(--serif);font-size:clamp(.88rem,2vw,1.1rem);font-style:italic;color:var(--dim);border-left:1px solid var(--a);padding-left:16px;max-width:460px;margin:14px 0 20px;line-height:1.9}
+
+        /* SEKCE */
+        .sekce{padding:40px 0;border-bottom:1px solid var(--border)}
+        .sekce-label{font-size:9px;letter-spacing:.2em;text-transform:uppercase;color:var(--a);margin-bottom:12px}
+        h2{font-family:var(--serif);font-size:clamp(1.3rem,3.5vw,2rem);font-weight:300;margin-bottom:12px}
+        h2 em{font-style:italic;color:var(--a)}
+        h3{font-family:var(--serif);font-size:1rem;font-weight:300;margin:14px 0 6px;color:var(--cream)}
+
+        /* DETAILS (ROZBALOVACÍ) */
+        details{margin-bottom:8px;border:1px solid var(--border);background:var(--s)}
+        details[open]{border-color:var(--border-hi)}
+        summary{padding:14px 18px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;font-size:.82rem;color:var(--cream);transition:background .15s}
+        summary:hover{background:var(--s2)}
+        summary::-webkit-details-marker{display:none}
+        summary::after{content:'▾';color:var(--a);font-size:.7rem;transition:transform .25s}
+        details[open] summary::after{transform:rotate(180deg)}
+        .dt-content{padding:0 18px 18px 18px;font-size:.76rem;color:var(--dim);line-height:1.9}
+
+        /* TLAČÍTKA */
+        .btn-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+        .btn{padding:10px 18px;font-family:var(--mono);font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;border:none;cursor:pointer;transition:all .12s;display:inline-block;text-align:center}
+        .btn-p{background:var(--a);color:var(--bg)}
+        .btn-p:hover{background:#daa050}
+        .btn-g{background:transparent;color:var(--dim);border:1px solid var(--border)}
+        .btn-g:hover{color:var(--cream);border-color:var(--border-hi)}
+
+        /* BOXY */
+        .box{border:1px solid var(--border);padding:16px;margin:10px 0;background:var(--s);font-size:.76rem}
+        .box.warn{border-color:var(--a2);background:var(--ab)}
+        .box p{margin-bottom:6px}
+
+        /* GRID */
+        .grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+        @media(max-width:500px){.grid{grid-template-columns:1fr}}
+
+        footer{padding:20px 0;border-top:1px solid var(--border);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-top:6px;font-size:.68rem;color:var(--dim2)}
+        footer a{color:var(--a)}
+    </style>
+</head>
+<body>
+
+<nav>
+    <a class="nav-back" href="https://artmisanovak-prog.github.io/Fenomeny_Kreativni_Slovnik_Mezer_Chces_Mys/">← Chceš myš?</a>
+    <div class="nav-links">
+        <a class="nav-link active" href="index.html">Úvod</a>
+        <a class="nav-link" href="./doma/nastroje/zapisnik.html">Zápisník</a>
+        <a class="nav-link" href="./doma/nastroje/forenzni_analyzer.html">Analyzátor</a>
+        <a class="nav-link" href="./doma/nastroje/porovnavac.html">Porovnávač</a>
+    </div>
+</nav>
+
+<div class="wrap">
+
+<!-- HERO -->
+<section class="hero">
+    <div class="hero-img">
+        <img src="./doma/ilustrace/mys_ikonka.png" alt="Myš" id="heroMouse" onclick="activateMouse()" title="Klikni pro spuštění">
+    </div>
+    <p class="hero-label">Analyzátor výpovědí</p>
+    <h1>Chceš myš? <em>Forenzní</em></h1>
+    <p class="hero-veta">Druhý pár očí na vaše výpovědi. Neříká, co je pravda — ukazuje, kde se jazyk chová jinak, než byste čekali.</p>
+</section>
+
+<!-- CO TO JE -->
+<section class="sekce">
+    <p class="sekce-label">O nástroji</p>
+    <h2>Co to je a pro koho</h2>
+
+    <p style="margin-bottom:14px;color:var(--dim);font-size:.82rem;">Analyzátor výpovědí je offline HTML nástroj, který pomáhá právníkům, advokátům a soudcům systematicky analyzovat texty výpovědí. Nehledá „pravdu" — hledá <strong style="color:var(--cream)">místa, kde se jazyk chová jinak</strong>, než byste čekali.</p>
+
+    <details>
+        <summary>🧠 Jak to funguje</summary>
+        <div class="dt-content">
+            <p><strong style="color:var(--a)">1. Vyplňte baseline</strong> — známá fakta případu, časovou osu, osoby, klíčová slova.</p>
+            <p><strong style="color:var(--a)">2. Vložte výpovědi</strong> — texty svědků, obviněných, poškozených.</p>
+            <p><strong style="color:var(--a)">3. Nástroj detekuje</strong> — 12 typů jazykových signálů (opakování, přeskoky, fixace, změny času, prázdná slova…).</p>
+            <p><strong style="color:var(--a)">4. Porovná s baseline</strong> — vypočítá permutační skóre odchylky a zobrazí kognitivní mapu.</p>
+            <p style="margin-top:10px;font-style:italic;color:var(--a)">Myš zapisuje do skulin mezi slovy to, co lidské oko přeskočí.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>👥 Pro koho je určen</summary>
+        <div class="dt-content">
+            <p><strong style="color:var(--cream)">✓ Advokáti a obhájci</strong> — příprava na křížový výslech, argumentace u soudu.</p>
+            <p><strong style="color:var(--cream)">✓ Státní zástupci</strong> — posouzení konzistence výpovědí.</p>
+            <p><strong style="color:var(--cream)">✓ Soudci</strong> — nezávislý, systematický přehled o výpovědích v případu.</p>
+            <p><strong style="color:var(--cream)">✓ Soudní znalci</strong> — podklad pro znalecké posudky.</p>
+            <p><strong style="color:var(--cream)">✓ Studenti práv</strong> — výuka, výzkum justičních omylů.</p>
+        </div>
+    </details>
+
+    <details>
+        <summary>🚫 Pro koho není a co nedělá</summary>
+        <div class="dt-content">
+            <p><strong style="color:var(--a2)">✕ Není pro laickou veřejnost</strong> bez znalosti kontextu trestního řízení.</p>
+            <p><strong style="color:var(--a2)">✕ Není důkazní prostředek</strong> — výstupy jsou jen pomocné.</p>
+            <p><strong style="color:var(--a2)">✕ Nerozhoduje o vině ani nevině</strong> — nástroj neříká „lež/pravda", jen ukazuje odchylky.</p>
+        </div>
+    </details>
+
+    <div class="box warn">
+        <p><strong style="color:var(--a)">⚠️ Důležité:</strong> Tento nástroj nemá uzavírat, ale naopak <strong style="color:var(--cream)">otevírat</strong>. Pracuje s jazykem jako materiálem a s mezerami jako s daty. Nedetekuje významy — interpretace je vždy na vás.</p>
+    </div>
+</section>
+
+<!-- NÁSTROJE -->
+<section class="sekce">
+    <p class="sekce-label">Nástroje</p>
+    <h2>Rychlý přístup</h2>
+    <div class="grid">
+        <a href="./doma/nastroje/zapisnik.html" class="box" style="text-align:center;display:block;transition:border-color .15s">
+            <div style="font-size:2rem;margin-bottom:4px">📋</div>
+            <div style="font-weight:400;color:var(--cream)">Zápisník</div>
+            <div style="font-size:.64rem;color:var(--dim)">Baseline a výpovědi</div>
+        </a>
+        <a href="./doma/nastroje/forenzni_analyzer.html" class="box" style="text-align:center;display:block;transition:border-color .15s">
+            <div style="font-size:2rem;margin-bottom:4px">🔍</div>
+            <div style="font-weight:400;color:var(--cream)">Analyzátor</div>
+            <div style="font-size:.64rem;color:var(--dim)">Detekce 12 signálů</div>
+        </a>
+        <a href="./doma/nastroje/porovnavac.html" class="box" style="text-align:center;display:block;transition:border-color .15s">
+            <div style="font-size:2rem;margin-bottom:4px">⚖️</div>
+            <div style="font-weight:400;color:var(--cream)">Porovnávač</div>
+            <div style="font-size:.64rem;color:var(--dim)">Srovnání dvou výpovědí</div>
+        </a>
+        <a href="./doma/dokumenty/manual.html" class="box" style="text-align:center;display:block;transition:border-color .15s">
+            <div style="font-size:2rem;margin-bottom:4px">📘</div>
+            <div style="font-weight:400;color:var(--cream)">Manuál</div>
+            <div style="font-size:.64rem;color:var(--dim)">Podrobný návod</div>
+        </a>
+    </div>
+</section>
+
+<!-- DOKUMENTACE -->
+<section class="sekce">
+    <p class="sekce-label">Dokumentace</p>
+    <h2>Metodika a podmínky</h2>
+    <div class="grid">
+        <a href="./doma/dokumenty/argumenty.html" class="box" style="display:block;transition:border-color .15s">
+            <div style="font-weight:400;color:var(--cream)">🗣️ Argumenty pro justici</div>
+            <div style="font-size:.64rem;color:var(--dim)">Proč je nástroj bezpečný a užitečný</div>
+        </a>
+        <a href="./doma/dokumenty/eticky_kodex.html" class="box" style="display:block;transition:border-color .15s">
+            <div style="font-weight:400;color:var(--cream)">📜 Etický kodex</div>
+            <div style="font-size:.64rem;color:var(--dim)">Pravidla použití</div>
+        </a>
+        <a href="./doma/dokumenty/modelove_scenare.html" class="box" style="display:block;transition:border-color .15s">
+            <div style="font-weight:400;color:var(--cream)">💡 Modelové scénáře</div>
+            <div style="font-size:.64rem;color:var(--dim)">Příklady použití v praxi</div>
+        </a>
+        <a href="./doma/licence.html" class="box" style="display:block;transition:border-color .15s">
+            <div style="font-weight:400;color:var(--cream)">⚖️ Licence</div>
+            <div style="font-size:.64rem;color:var(--dim)">Podmínky použití</div>
+        </a>
+    </div>
+</section>
+
+<!-- CENY -->
+<section class="sekce">
+    <p class="sekce-label">Ceny</p>
+    <h2>Licence a objednávky</h2>
+    <div class="box" style="text-align:center">
+        <p style="font-family:var(--serif);font-size:1.4rem;color:var(--cream)">Individuální licence</p>
+        <p style="font-size:2rem;color:var(--a);margin:8px 0">130 000 Kč</p>
+        <p style="color:var(--dim)">Jednorázová platba · Nástroj je váš navždy · Offline použití</p>
+        <a href="mailto:chcesmys@gmail.com" class="btn btn-p" style="margin-top:12px;display:inline-block">📧 Objednat</a>
+    </div>
+</section>
+
+<footer>
+    <p>Chceš myš? · Forenzní jazykové mapování · © 2026 Michaela Nováková</p>
+    <p><a href="mailto:chcesmys@gmail.com">chcesmys@gmail.com</a></p>
+</footer>
+
+</div>
+
+<script>
+    // Otočení myši po kliknutí
+    function activateMouse() {
+        const img = document.getElementById('heroMouse');
+        img.classList.toggle('active');
+        if (img.classList.contains('active')) {
+            img.title = 'Myš je připravena. Nástroj je aktivní.';
+        } else {
+            img.title = 'Klikni pro spuštění';
+        }
+    }
+
+    // Otevření detailů po kliknutí na Myš
+    document.getElementById('heroMouse').addEventListener('click', function() {
+        const firstDetails = document.querySelector('details');
+        if (firstDetails && !firstDetails.open) {
+            firstDetails.open = true;
+        }
+    });
+</script>
+
+</body>
+</html>
