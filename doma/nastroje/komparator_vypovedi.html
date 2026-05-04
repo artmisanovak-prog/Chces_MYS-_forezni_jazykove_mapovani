@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komparátor výpovědí · Chceš myš?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1e1b1a;
+            --surface: #282422;
+            --text: #d6cfc7;
+            --text-dim: #8a8279;
+            --accent: #8b3a3a;
+            --accent-light: #b05a5a;
+            --gold: #b8995c;
+            --border: #38332e;
+            --border-hi: #4a433d;
+            --serif: 'Lora', Georgia, serif;
+            --sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: var(--sans); font-size: 14px; line-height: 1.7;
+            -webkit-font-smoothing: antialiased; padding: 2rem 1.5rem;
+            max-width: 1100px; margin: 0 auto;
+        }
+        h1 { font-family: var(--serif); font-size: 1.9rem; font-weight: 400; border-left: 4px solid var(--accent); padding-left: 1rem; margin-bottom: 0.4rem; }
+        h2 { font-family: var(--serif); font-size: 1.5rem; font-weight: 400; margin: 2rem 0 1rem; color: var(--text); }
+        h3 { font-family: var(--sans); font-size: 0.95rem; font-weight: 500; margin: 1.2rem 0 0.5rem; color: var(--text); }
+        .sub { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 1.8rem; }
+        .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .flex-col { flex: 1 1 300px; }
+        textarea {
+            width: 100%; padding: 1rem; font-family: 'Courier New', monospace;
+            font-size: 0.9rem; border: 1px solid var(--border); background: var(--surface);
+            color: var(--text); resize: vertical; min-height: 220px; border-radius: 6px;
+        }
+        textarea:focus { outline: none; border-color: var(--accent-light); }
+        label { display: block; margin-bottom: 0.3rem; font-weight: 500; color: var(--text-dim); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        .btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0; justify-content: center; }
+        button {
+            background: var(--surface); color: var(--text); border: 1px solid var(--border);
+            padding: 0.5rem 1.5rem; font-size: 0.82rem; border-radius: 4px; cursor: pointer;
+            font-family: var(--sans); transition: all 0.15s; letter-spacing: 0.04em;
+        }
+        button:hover { border-color: var(--accent-light); color: var(--accent-light); }
+        button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+        button.primary:hover { background: var(--accent-light); border-color: var(--accent-light); }
+        #results { display: none; margin-top: 2rem; border-top: 2px solid var(--border); padding-top: 1.5rem; }
+        .stat-row { display: flex; gap: 1rem; flex-wrap: wrap; margin: 1rem 0; }
+        .stat-box { background: var(--surface); border: 1px solid var(--border); padding: 0.8rem 1rem; border-radius: 6px; flex: 1 1 150px; text-align: center; }
+        .stat-box .num { font-size: 1.3rem; font-weight: 500; color: var(--text); }
+        .stat-box .lbl { font-size: 0.7rem; color: var(--text-dim); text-transform: uppercase; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 1rem 0; }
+        th, td { border: 1px solid var(--border); padding: 0.6rem 0.8rem; text-align: left; vertical-align: top; }
+        th { background: var(--surface); color: var(--text); font-weight: 500; }
+        .row-diff { background: rgba(139,58,58,0.1); }
+        .row-same { background: rgba(184,153,92,0.05); }
+        details { margin-bottom: 6px; border: 1px solid var(--border); background: var(--surface); border-radius: 4px; }
+        details[open] { border-color: var(--border-hi); }
+        summary { padding: 10px 16px; cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem; color: var(--text); transition: background 0.15s; }
+        summary:hover { background: rgba(255,255,255,0.02); }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '▾'; color: var(--accent-light); font-size: 0.7rem; transition: transform 0.25s; }
+        details[open] summary::after { transform: rotate(180deg); }
+        .detail-content { padding: 0 16px 14px 16px; font-size: 0.8rem; color: var(--text-dim); line-height: 1.7; }
+        .profile-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem; margin: 1rem 0; }
+        @media(max-width:600px) { .profile-grid { grid-template-columns: 1fr; } }
+        .profile-card {
+            background: var(--surface); border: 1px solid var(--border); padding: 0.8rem 1rem; border-radius: 6px; font-size: 0.78rem;
+            display: flex; align-items: center; gap: 0.8rem;
+        }
+        .profile-card.active { border-left: 3px solid var(--accent); background: #2a2220; }
+        .profile-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+        .profile-dot.active { background: var(--accent-light); }
+        .profile-dot.inactive { background: var(--border); }
+        .warning-box { padding: 1rem; border-radius: 6px; margin: 1rem 0; font-size: 0.82rem; border-left: 4px solid var(--accent); background: rgba(139,58,58,0.08); }
+        .warning-box.warn-high { background: #2a2020; }
+        .key-list { display: flex; flex-wrap: wrap; gap: 0.4rem; margin: 0.6rem 0; }
+        .key-tag { font-size: 0.68rem; padding: 0.2rem 0.6rem; border-radius: 20px; background: var(--surface); border: 1px solid var(--border); }
+        .similarity-bar { height: 6px; background: var(--border); border-radius: 3px; margin: 0.4rem 0; overflow: hidden; }
+        .similarity-fill { height: 100%; background: var(--gold); border-radius: 3px; }
+        footer { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid var(--border); text-align: center; font-size: 0.72rem; color: var(--text-dim); }
+        footer a { color: var(--gold); }
+    </style>
+</head>
+<body>
+    <h1>Komparátor výpovědí</h1>
+    <div class="sub">Porovnání dvou textů – strukturální shody, rozdíly, forenzní profily. Plně offline.</div>
+
+    <div class="flex-row">
+        <div class="flex-col">
+            <label>Text A (referenční / baseline)</label>
+            <textarea id="textA" placeholder="Vložte první text…"></textarea>
+        </div>
+        <div class="flex-col">
+            <label>Text B (srovnávaný)</label>
+            <textarea id="textB" placeholder="Vložte druhý text…"></textarea>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button id="compareBtn" class="primary">Spustit srovnání</button>
+        <button id="clearBtn">Smazat vše</button>
+    </div>
+
+    <div id="results">
+        <!-- Základní statistiky -->
+        <h2>Základní srovnání</h2>
+        <div class="stat-row" id="statsRow"></div>
+        <div class="similarity-bar"><div class="similarity-fill" id="similarityFill" style="width:0%;"></div></div>
+        <p style="font-size:0.78rem;color:var(--text-dim);text-align:center;" id="similarityLabel"></p>
+
+        <!-- Porovnání vět -->
+        <details>
+            <summary>Větná shoda (tabulka)</summary>
+            <div class="detail-content" id="sentenceTable"></div>
+        </details>
+
+        <!-- Forenzní profily -->
+        <h2>Forenzní profily</h2>
+        <div class="flex-row" id="profileComparison"></div>
+
+        <!-- Společné profily – varování -->
+        <div id="sharedWarning"></div>
+
+        <!-- Detailní klíče -->
+        <details>
+            <summary>Detekované Myší klíče v obou textech</summary>
+            <div class="detail-content flex-row" id="keyDetail"></div>
+        </details>
+    </div>
+
+    <footer>
+        Nástroj pracuje s 12 Myšími klíči. Interpretace je vždy na vás. Výstupy nejsou důkazem.<br>
+        Chceš myš? · © 2026 Michaela Nováková · <a href="mailto:chcesmys@gmail.com">chcesmys@gmail.com</a>
+    </footer>
+
+<script>
+    // ============================================================
+    // 1. MYŠÍ KLÍČE (12 jazykových poruch)
+    // ============================================================
+    const MOUSE_KEYS = [
+        { id: 'opakovani', name: 'Opakování', weight: 0.5, detect(t, s, w) {
+            const freq = {}; w.forEach(wd => { if(wd.length>3) freq[wd]=(freq[wd]||0)+1; });
+            return Object.values(freq).filter(c => c >= 3).length > 0 ? [Math.min(3, Object.values(freq).filter(c=>c>=3).length) + '×'] : [];
+        }},
+        { id: 'preskok', name: 'Přeskok', weight: 0.8, detect(t, s) {
+            let skips = 0;
+            for(let i=1; i<s.length; i++) {
+                const prev = s[i-1].toLowerCase(), curr = s[i].toLowerCase();
+                if((prev.includes('?') && !curr.match(/^(ano|ne|protože|ale|tak|no|jo)/i)) ||
+                   (prev.match(/^(kde|kam|kdy|proč|jak|co|kdo)\b/i) && !curr.match(/^(protože|v|na|u|před|za|do|k)/i))) skips++;
+            }
+            return skips > 0 ? [skips + '×'] : [];
+        }},
+        { id: 'fixace', name: 'Fixace', weight: 0.5, detect(t, s, w) {
+            const repeated = []; const freq = {};
+            w.forEach(wd => { if(wd.length>3) freq[wd]=(freq[wd]||0)+1; });
+            Object.entries(freq).filter(([k,v])=>v>=3).forEach(([k,v])=>repeated.push(k));
+            return repeated.length > 0 ? [repeated.join(', ')] : [];
+        }},
+        { id: 'ztrata_souseda', name: 'Ztráta souseda', weight: 0.6, detect(t, s) {
+            let orphan = 0;
+            for(let i=1; i<s.length-1; i++) {
+                const words = s[i].split(/\s+/).length;
+                if(words <= 3 && s[i].length < 40 && !s[i].match(/^(a|ale|však|i|nebo|protože|tak|takže|když|aby)\b/i)) orphan++;
+            }
+            return orphan > 0 ? [orphan + '×'] : [];
+        }},
+        { id: 'pretrzeni', name: 'Přetržení', weight: 0.9, detect(t, s) {
+            const broken = s.filter(si => si.trim().endsWith('…') || si.trim().endsWith('...') || si.trim().endsWith('no nic') || si.trim().endsWith('to je jedno'));
+            return broken.length > 0 ? [broken.length + '×'] : [];
+        }},
+        { id: 'posun_kontextu', name: 'Posun kontextu', weight: 0.5, detect(t, s) {
+            const shifts = s.filter(si => /\b(mimochodem|co se týče|ostatně|jinak|ale jinak|co se týká)\b/i.test(si));
+            return shifts.length > 0 ? [shifts.length + '×'] : [];
+        }},
+        { id: 'zamena_roli', name: 'Záměna rolí', weight: 0.6, detect(t) {
+            const hasI = /\b(já|jsem|mě|mi|můj|moje|my|nás)\b/i.test(t);
+            const hasThey = /\b(on|ona|ono|oni|jej|jeho|její)\b/i.test(t);
+            return hasI && hasThey ? ['já ↔ on'] : [];
+        }},
+        { id: 'rozpad_syntaxe', name: 'Rozpad syntaxe', weight: 0.9, detect(t, s) {
+            const broken = s.filter(si => si.split(/\s+/).length <= 2 && si.length > 5 && !/[.!?]$/.test(si.trim()));
+            return broken.length > 0 ? [broken.length + '×'] : [];
+        }},
+        { id: 'emocni_zlom', name: 'Emocionální zlom', weight: 0.7, detect(t, s) {
+            const lens = s.map(si => si.split(/\s+/).length);
+            for(let i=2; i<lens.length; i++) { if(lens[i] > lens[i-1]*2.5 || lens[i] < lens[i-1]/2.5) return ['náhlá změna délky vět']; }
+            return [];
+        }},
+        { id: 'prazdna_slova', name: 'Prázdná slova', weight: 0.3, detect(t) {
+            const fillers = (t.match(/\b(jakoby|prostě|vlastně|no|že jo|víš co|jako)\b/gi)||[]).length;
+            return fillers >= 3 ? [fillers + '×'] : [];
+        }},
+        { id: 'cizi_teleso', name: 'Cizí těleso', weight: 0.7, detect(t, s) {
+            const odd = s.filter(si => si.length > 10 && !/[.!?]$/.test(si.trim()) && /\b(mám rád|mám ráda|oblíbený|oblíbená|miluji|nesnáším)\b/i.test(si));
+            return odd.length > 0 ? [odd.length + '×'] : [];
+        }},
+        { id: 'ticho_mezera', name: 'Ticho / mezera', weight: 0.9, detect(t) {
+            const gaps = (t.match(/\(mlčí\)|\(ticho\)|\(pauza\)|—/gi)||[]).length;
+            return gaps > 0 ? [gaps + '×'] : [];
+        }}
+    ];
+
+    // ============================================================
+    // 2. FORENZNÍ PROFILY (postavené na Myších klíčích)
+    // ============================================================
+    const PROFILES = [
+        { name: 'Předem připravená výpověď', desc: 'Text působí jako naučený — opakování frází, minimum přirozených vad.',
+          criteria: { opakovani:{min:1.5,w:2}, pretrzeni:{max:0.2,w:2}, prazdna_slova:{max:0.5,w:1}, rozpad_syntaxe:{max:0.5,w:1} },
+          forensic: 'Výpověď pravděpodobně předem připravená. V mluveném projevu podezřelé.' },
+        { name: 'Spontánní, nepřipravený projev', desc: 'Přirozený tok řeči s váháním, opravami a krátkými větami.',
+          criteria: { prazdna_slova:{min:1.5,w:2}, rozpad_syntaxe:{min:1,w:1.5}, pretrzeni:{min:0.8,w:1.5}, opakovani:{max:0.8,w:1} },
+          forensic: 'Autentický projev, může být stresovaný, ale nepřipravený.' },
+        { name: 'Vyhýbání se odpovědnosti', desc: 'Popírání, vynechávání podmětu, opakování — snaha distancovat se.',
+          criteria: { pretrzeni:{min:1,w:2}, opakovani:{min:1.5,w:2}, zamena_roli:{min:0.5,w:2}, posun_kontextu:{min:0.8,w:1.5} },
+          forensic: 'Možné klamání nebo snaha se distancovat.' },
+        { name: 'Emoční přetlak', desc: 'Emocionálně nabitá výpověď s nadsázkou, gradací a zlomy.',
+          criteria: { emocni_zlom:{min:0.5,w:2.5}, opakovani:{min:1,w:1.5}, prazdna_slova:{min:1,w:1}, rozpad_syntaxe:{min:0.8,w:1} },
+          forensic: 'Může být autentické trauma, ale i stylizace.' },
+        { name: 'Nestabilní perspektiva', desc: 'Svědek přepíná mezi vlastní zkušeností a doslechem, mění role.',
+          criteria: { zamena_roli:{min:0.5,w:2.5}, preskok:{min:0.8,w:2}, posun_kontextu:{min:0.8,w:1.5} },
+          forensic: 'Svědek nestabilně přepíná perspektivu — možná popisuje cizí zážitek.' },
+        { name: 'Nerealistická plynulost', desc: 'Text je příliš hladký, bez přirozených oprav a krátkých vět.',
+          criteria: { prazdna_slova:{max:0.3,w:2}, rozpad_syntaxe:{max:0.3,w:2}, pretrzeni:{max:0.3,w:1.5}, opakovani:{min:1.5,w:1.5} },
+          forensic: 'Téměř jistě předem napsaný text, odříkávaný.' },
+        { name: 'Zaseknutí (fixace)', desc: 'Opakování stejných slov, neschopnost posunout se dále.',
+          criteria: { fixace:{min:2,w:3}, opakovani:{min:2,w:2} },
+          forensic: 'Stres, zahlcování, nebo úmyslné zdůraznění.' },
+        { name: 'Přehnaná konkrétnost', desc: 'Nepřirozeně mnoho detailů — čísla, vlastní jména, přesné časy.',
+          criteria: { opakovani:{min:2,w:1.5} },
+          customCheck: (t) => {
+              const numbers = (t.match(/\b\d+\b/g)||[]).length;
+              const proper = (t.match(/\b[A-ZÁČĎÉĚÍŇÓŘŠŤŮÚÝŽ][a-záčďéěíňóřšťůúýž]+\b/g)||[]).length;
+              const words = t.split(/\s+/).length;
+              return ((numbers+proper)/Math.max(words,1))*100 > 8 ? {active:true, strength:Math.min(3, ((numbers+proper)/Math.max(words,1))*100/4)} : {active:false, strength:0};
+          },
+          forensic: 'Často známka naučené výpovědi.' }
+    ];
+
+    function splitSentences(text) {
+        return text.split(/(?<=[.!?…])\s+|(?<=…)\s*|\n(?=\S)/).map(s=>s.trim()).filter(s=>s.length>1);
+    }
+
+    function detectKeys(text) {
+        const sentences = splitSentences(text);
+        const words = text.toLowerCase().split(/\s+/).map(w=>w.replace(/[.,!?;:]/g,''));
+        const results = {};
+        MOUSE_KEYS.forEach(key => {
+            const hits = key.detect(text, sentences, words);
+            const per100 = (hits.length / Math.max(words.length,1)) * 100;
+            results[key.id] = { name: key.name, weight: key.weight, hits, per100 };
+        });
+        return { results, sentences, words };
+    }
+
+    function evaluateProfiles(text, keyResults) {
+        const active = [];
+        PROFILES.forEach(prof => {
+            if (prof.customCheck) {
+                const res = prof.customCheck(text);
+                if (res.active) active.push(prof.name);
+                return;
+            }
+            let totalW = 0, satW = 0;
+            Object.entries(prof.criteria).forEach(([kid, cfg]) => {
+                const val = keyResults[kid]?.per100 || 0;
+                totalW += cfg.w;
+                if ((cfg.min !== undefined && val >= cfg.min) || (cfg.max !== undefined && val <= cfg.max)) satW += cfg.w;
+            });
+            if (totalW > 0 && satW/totalW >= 0.6) active.push(prof.name);
+        });
+        if (active.length === 0) active.push('Neutrální profil');
+        return active;
+    }
+
+    // ============================================================
+    // 3. HLAVNÍ LOGIKA
+    // ============================================================
+    function similarity(a, b) {
+        const wa = a.toLowerCase().replace(/[^a-zá-ž]/g, ' ').split(/\s+/);
+        const wb = b.toLowerCase().replace(/[^a-zá-ž]/g, ' ').split(/\s+/);
+        const common = wa.filter(w => w.length > 3 && wb.includes(w)).length;
+        return wa.length + wb.length > 0 ? common / Math.max(wa.length, wb.length) : 0;
+    }
+
+    function run() {
+        const textA = document.getElementById('textA').value.trim();
+        const textB = document.getElementById('textB').value.trim();
+        if (!textA || !textB) { alert('Vyplňte oba texty.'); return; }
+
+        const sentA = splitSentences(textA), sentB = splitSentences(textB);
+        const wordsA = textA.split(/\s+/).length, wordsB = textB.split(/\s+/).length;
+        const diff = Math.abs(wordsA - wordsB);
+        const simPct = Math.round((1 - diff / Math.max(wordsA, wordsB)) * 100);
+
+        // Statistiky
+        document.getElementById('statsRow').innerHTML = `
+            <div class="stat-box"><div class="num">${sentA.length}</div><div class="lbl">Vět A</div></div>
+            <div class="stat-box"><div class="num">${sentB.length}</div><div class="lbl">Vět B</div></div>
+            <div class="stat-box"><div class="num">${wordsA}</div><div class="lbl">Slov A</div></div>
+            <div class="stat-box"><div class="num">${wordsB}</div><div class="lbl">Slov B</div></div>
+            <div class="stat-box"><div class="num">${simPct}%</div><div class="lbl">Podobnost</div></div>
+        `;
+        document.getElementById('similarityFill').style.width = simPct + '%';
+        document.getElementById('similarityLabel').textContent = `Lexikální podobnost: ${simPct}%`;
+
+        // Tabulka vět
+        const maxLen = Math.max(sentA.length, sentB.length);
+        let tableHtml = '<table><tr><th>#</th><th>Text A</th><th>Text B</th><th>Shoda</th></tr>';
+        for (let i = 0; i < maxLen; i++) {
+            const a = sentA[i] || '', b = sentB[i] || '';
+            const sim = a && b ? similarity(a, b) : 0;
+            const cls = !a || !b ? 'row-diff' : (sim > 0.7 ? 'row-same' : 'row-diff');
+            const status = !a ? 'Jen v B' : !b ? 'Jen v A' : (sim > 0.7 ? 'Shodné' : 'Rozdílné');
+            tableHtml += `<tr class="${cls}"><td>${i+1}</td><td>${esc(a) || '—'}</td><td>${esc(b) || '—'}</td><td>${status}</td></tr>`;
+        }
+        document.getElementById('sentenceTable').innerHTML = tableHtml + '</table>';
+
+        // Forenzní profily
+        const keysA = detectKeys(textA), keysB = detectKeys(textB);
+        const profA = evaluateProfiles(textA, keysA.results), profB = evaluateProfiles(textB, keysB.results);
+        const allProfiles = [...new Set([...PROFILES.map(p=>p.name), 'Neutrální profil'])];
+
+        document.getElementById('profileComparison').innerHTML = `
+            <div class="flex-col"><h3>Profily – Text A</h3>${allProfiles.map(pn => {
+                const active = profA.includes(pn); const prof = PROFILES.find(p=>p.name===pn);
+                return `<div class="profile-card${active?' active':''}"><span class="profile-dot${active?' active':' inactive'}"></span><span>${pn}${active&&prof?': <em style="color:var(--accent-light)">'+prof.forensic+'</em>':''}</span></div>`;
+            }).join('')}</div>
+            <div class="flex-col"><h3>Profily – Text B</h3>${allProfiles.map(pn => {
+                const active = profB.includes(pn); const prof = PROFILES.find(p=>p.name===pn);
+                return `<div class="profile-card${active?' active':''}"><span class="profile-dot${active?' active':' inactive'}"></span><span>${pn}${active&&prof?': <em style="color:var(--accent-light)">'+prof.forensic+'</em>':''}</span></div>`;
+            }).join('')}</div>
+        `;
+
+        // Varování na shodné profily
+        const shared = profA.filter(p => p !== 'Neutrální profil' && profB.includes(p));
+        const sharedWarn = document.getElementById('sharedWarning');
+        if (shared.length) {
+            sharedWarn.innerHTML = `<div class="warning-box warn-high"><strong>⚠️ Společné profily:</strong> ${shared.join(', ')}. Oba texty sdílejí tyto strukturální rysy – možná koordinace výpovědí nebo společný zdroj.</div>`;
+        } else {
+            sharedWarn.innerHTML = '';
+        }
+
+        // Klíče
+        const allKeyIds = MOUSE_KEYS.map(k => k.id);
+        document.getElementById('keyDetail').innerHTML = `
+            <div class="flex-col">${allKeyIds.map(kid => {
+                const ka = keysA.results[kid], kb = keysB.results[kid];
+                return `<div class="key-tag">${ka.name}: A ${ka.hits.length||0}× / B ${kb.hits.length||0}×</div>`;
+            }).join('')}</div>
+        `;
+
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('results').scrollIntoView({behavior:'smooth'});
+    }
+
+    function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    document.getElementById('compareBtn').addEventListener('click', run);
+    document.getElementById('clearBtn').addEventListener('click', () => {
+        document.getElementById('textA').value = '';
+        document.getElementById('textB').value = '';
+        document.getElementById('results').style.display = 'none';
+    });
+</script>
+</body>
+</html>
