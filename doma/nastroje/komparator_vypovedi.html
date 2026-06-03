@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Komparátor výpovědí · Chceš myš?</title>
+    <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #1e1b1a;
+            --surface: #282422;
+            --text: #d6cfc7;
+            --text-dim: #8a8279;
+            --accent: #8b3a3a;
+            --accent-light: #b05a5a;
+            --gold: #b8995c;
+            --border: #38332e;
+            --border-hi: #4a433d;
+            --serif: 'Lora', Georgia, serif;
+            --sans: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+        }
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        html { scroll-behavior: smooth; }
+        body {
+            background: var(--bg); color: var(--text);
+            font-family: var(--sans); font-size: 14px; line-height: 1.7;
+            -webkit-font-smoothing: antialiased; padding: 2rem 1.5rem;
+            max-width: 1100px; margin: 0 auto;
+        }
+        h1 { font-family: var(--serif); font-size: 1.9rem; font-weight: 400;
+             border-left: 4px solid var(--accent); padding-left: 1rem; margin-bottom: 0.4rem; }
+        h2 { font-family: var(--serif); font-size: 1.4rem; font-weight: 400;
+             margin: 2rem 0 1rem; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 0.4rem; }
+        h3 { font-family: var(--sans); font-size: 0.9rem; font-weight: 500;
+             margin: 1rem 0 0.5rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.06em; }
+        .sub { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 1.8rem; }
+        .flex-row { display: flex; gap: 1rem; flex-wrap: wrap; }
+        .flex-col { flex: 1 1 300px; }
+        label { display: block; margin-bottom: 0.3rem; font-weight: 500;
+                color: var(--text-dim); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+        textarea {
+            width: 100%; padding: 1rem; font-family: 'Courier New', monospace;
+            font-size: 0.88rem; border: 1px solid var(--border); background: var(--surface);
+            color: var(--text); resize: vertical; min-height: 240px; border-radius: 4px;
+            line-height: 1.6;
+        }
+        textarea:focus { outline: none; border-color: var(--accent-light); }
+        .btn-row { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0; }
+        button {
+            background: var(--surface); color: var(--text); border: 1px solid var(--border);
+            padding: 0.5rem 1.4rem; font-size: 0.82rem; border-radius: 4px; cursor: pointer;
+            font-family: var(--sans); transition: all 0.15s; letter-spacing: 0.04em;
+        }
+        button:hover { border-color: var(--accent-light); color: var(--accent-light); }
+        button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+        button.primary:hover { background: var(--accent-light); border-color: var(--accent-light); }
+
+        #results { display: none; margin-top: 2.5rem; }
+
+        /* Stat boxes */
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+                     gap: 0.6rem; margin: 1rem 0 1.5rem; }
+        .stat-box { background: var(--surface); border: 1px solid var(--border);
+                    padding: 0.9rem 1rem; border-radius: 4px; }
+        .stat-box .num { font-size: 1.4rem; font-weight: 500; color: var(--text); }
+        .stat-box .lbl { font-size: 0.68rem; color: var(--text-dim);
+                         text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.2rem; }
+        .stat-box.alert { border-color: var(--accent); }
+        .stat-box.alert .num { color: var(--accent-light); }
+
+        /* Phrase matches */
+        .phrase-list { margin: 0.5rem 0; }
+        .phrase-item {
+            background: var(--surface); border: 1px solid var(--border);
+            padding: 0.6rem 1rem; margin-bottom: 0.4rem; border-radius: 4px;
+            font-family: 'Courier New', monospace; font-size: 0.82rem; color: var(--text);
+        }
+        .phrase-item.strong { border-color: var(--accent); background: #2a2020; }
+        .phrase-len { font-size: 0.68rem; color: var(--text-dim); margin-left: 0.5rem; }
+
+        /* Structure comparison */
+        .struct-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1rem 0; }
+        @media(max-width: 600px) { .struct-grid { grid-template-columns: 1fr; } }
+        .struct-card { background: var(--surface); border: 1px solid var(--border);
+                       padding: 1rem; border-radius: 4px; }
+        .struct-row { display: flex; justify-content: space-between; align-items: center;
+                      padding: 0.35rem 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+        .struct-row:last-child { border-bottom: none; }
+        .struct-label { color: var(--text-dim); }
+        .struct-val { font-weight: 500; color: var(--text); }
+        .struct-diff { color: var(--accent-light); }
+
+        /* Key comparison */
+        .key-table { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin: 0.8rem 0; }
+        .key-table th, .key-table td { border: 1px solid var(--border);
+                                        padding: 0.5rem 0.7rem; text-align: left; }
+        .key-table th { background: var(--surface); color: var(--text-dim);
+                        font-weight: 500; font-size: 0.72rem; text-transform: uppercase; }
+        .key-table tr.diverge td { background: #2a2020; color: var(--accent-light); }
+        .key-table tr.converge td { background: #1e2a1e; color: #7a9a7a; }
+
+        /* Profile comparison */
+        .profile-row { display: flex; align-items: center; gap: 0.8rem;
+                       padding: 0.5rem 0; border-bottom: 1px solid var(--border); font-size: 0.8rem; }
+        .profile-row:last-child { border-bottom: none; }
+        .profile-name { flex: 1; color: var(--text); }
+        .badge { font-size: 0.68rem; padding: 0.15rem 0.55rem; border-radius: 20px; white-space: nowrap; }
+        .badge-a { background: var(--accent); color: #fff; }
+        .badge-b { background: #2050a0; color: #fff; }
+        .badge-both { background: #5a3a00; color: #e0b060; border: 1px solid #8a6020; }
+        .badge-none { background: var(--border); color: var(--text-dim); }
+
+        /* Sentence table */
+        .sent-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin: 0.8rem 0; }
+        .sent-table th, .sent-table td { border: 1px solid var(--border);
+                                          padding: 0.45rem 0.6rem; vertical-align: top; }
+        .sent-table th { background: var(--surface); color: var(--text-dim);
+                         font-weight: 500; font-size: 0.7rem; text-transform: uppercase; }
+        .sent-table .only-a { background: #2a2020; }
+        .sent-table .only-b { background: #1e2030; }
+        .sent-table .shared { background: #1e2a1e; }
+
+        details { margin-bottom: 0.6rem; border: 1px solid var(--border);
+                  background: var(--surface); border-radius: 4px; }
+        details[open] { border-color: var(--border-hi); }
+        summary { padding: 10px 16px; cursor: pointer; list-style: none;
+                  display: flex; justify-content: space-between; align-items: center;
+                  font-size: 0.82rem; color: var(--text); }
+        summary::-webkit-details-marker { display: none; }
+        summary::after { content: '▾'; color: var(--accent-light); font-size: 0.7rem; }
+        details[open] summary::after { transform: rotate(180deg); display: inline-block; }
+        .detail-body { padding: 0 16px 14px; font-size: 0.8rem; color: var(--text-dim); line-height: 1.7; }
+
+        footer { margin-top: 2.5rem; padding-top: 1.2rem; border-top: 1px solid var(--border);
+                 text-align: center; font-size: 0.72rem; color: var(--text-dim); }
+        footer a { color: var(--gold); }
+    </style>
+</head>
+<body>
+    <h1>Komparátor výpovědí</h1>
+    <div class="sub">Strukturální porovnání dvou textů · frázové shody · profily poruch · plně offline</div>
+
+    <div class="flex-row">
+        <div class="flex-col">
+            <label>Text A — referenční / baseline</label>
+            <textarea id="textA" placeholder="Vložte první text…"></textarea>
+        </div>
+        <div class="flex-col">
+            <label>Text B — srovnávaný</label>
+            <textarea id="textB" placeholder="Vložte druhý text…"></textarea>
+        </div>
+    </div>
+
+    <div class="btn-row">
+        <button class="primary" onclick="run()">Spustit srovnání</button>
+        <button onclick="clear_()">Smazat vše</button>
+    </div>
+
+    <div id="results">
+
+        <h2>Základní statistiky</h2>
+        <div class="stat-grid" id="statsGrid"></div>
+
+        <h2>Frázové shody</h2>
+        <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.8rem">
+            Sekvence 5 a více slov shodných v obou textech. Delší sekvence jsou silnější signál.
+        </p>
+        <div id="phraseResults"></div>
+
+        <h2>Strukturální otisky</h2>
+        <p style="font-size:0.8rem;color:var(--text-dim);margin-bottom:0.8rem">
+            Měřené vlastnosti struktury textu nezávisle na obsahu.
+        </p>
+        <div class="struct-grid" id="structGrid"></div>
+
+        <h2>Porovnání jazykových klíčů</h2>
+        <div id="keyResults"></div>
+
+        <h2>Forenzní profily</h2>
+        <div id="profileResults"></div>
+
+        <details>
+            <summary>Větná tabulka</summary>
+            <div class="detail-body" id="sentTable"></div>
+        </details>
+
+    </div>
+
+    <footer>
+        Chceš myš? · Forenzní jazykové mapování · © 2026 Michaela Nováková ·
+        <a href="mailto:chcesmys@gmail.com">chcesmys@gmail.com</a>
+    </footer>
+
+<script>
+// ── MOUSE KEYS ──────────────────────────────────────────────────
+const KEYS = [
+    { id: 'opakovani',      name: 'Opakování',
+      detect(t, s, w) {
+        const f = {}; w.forEach(x => { if(x.length > 3) f[x] = (f[x]||0)+1; });
+        const n = Object.values(f).filter(c => c >= 3).length;
+        return n > 0 ? n : 0;
+      }},
+    { id: 'preskok',        name: 'Přeskok',
+      detect(t, s) {
+        let n = 0;
+        for(let i = 1; i < s.length; i++) {
+            const p = s[i-1].toLowerCase(), c = s[i].toLowerCase();
+            if(p.includes('?') && !c.match(/^(ano|ne|protože|ale|tak|no|jo)/i)) n++;
+        }
+        return n;
+      }},
+    { id: 'fixace',         name: 'Fixace',
+      detect(t, s, w) {
+        const f = {}; w.forEach(x => { if(x.length > 4) f[x] = (f[x]||0)+1; });
+        return Object.values(f).filter(c => c >= 4).length;
+      }},
+    { id: 'ztrata_souseda', name: 'Ztráta souseda',
+      detect(t, s) {
+        let n = 0;
+        for(let i = 1; i < s.length-1; i++) {
+            const wc = s[i].split(/\s+/).length;
+            if(wc <= 3 && s[i].length < 40 &&
+               !s[i].match(/^(a|ale|však|nebo|protože|tak|takže|když|aby)\b/i)) n++;
+        }
+        return n;
+      }},
+    { id: 'pretrzeni',      name: 'Přetržení',
+      detect(t, s) {
+        return s.filter(x => /[…\.]{3}$/.test(x.trim()) || x.trim().endsWith('no nic')).length;
+      }},
+    { id: 'posun_kontextu', name: 'Posun kontextu',
+      detect(t, s) {
+        return s.filter(x => /\b(mimochodem|co se týče|ostatně|jinak|ale jinak)\b/i.test(x)).length;
+      }},
+    { id: 'zamena_roli',    name: 'Záměna rolí',
+      detect(t) {
+        const i = /\b(já|jsem|mě|mi|můj|moje)\b/i.test(t);
+        const o = /\b(on|ona|oni|jeho|její)\b/i.test(t);
+        return (i && o) ? 1 : 0;
+      }},
+    { id: 'rozpad_syntaxe', name: 'Rozpad syntaxe',
+      detect(t, s) {
+        return s.filter(x => x.split(/\s+/).length <= 2 && x.length > 5 && !/[.!?]$/.test(x.trim())).length;
+      }},
+    { id: 'emocni_zlom',    name: 'Emocionální zlom',
+      detect(t, s) {
+        const lens = s.map(x => x.split(/\s+/).length);
+        for(let i = 2; i < lens.length; i++) {
+            if(lens[i] > lens[i-1] * 2.5 || lens[i] < lens[i-1] / 2.5) return 1;
+        }
+        return 0;
+      }},
+    { id: 'prazdna_slova',  name: 'Prázdná slova',
+      detect(t) {
+        return (t.match(/\b(jakoby|prostě|vlastně|no|že jo|jako)\b/gi)||[]).length;
+      }},
+    { id: 'cizi_teleso',    name: 'Cizí těleso',
+      detect(t, s) {
+        return s.filter(x => x.length > 10 &&
+            /\b(mám rád|miluji|nesnáším|oblíbený)\b/i.test(x)).length;
+      }},
+    { id: 'ticho_mezera',   name: 'Ticho / mezera',
+      detect(t) {
+        return (t.match(/\(mlčí\)|\(ticho\)|\(pauza\)|—/gi)||[]).length;
+      }},
+];
+
+// ── PROFILES ────────────────────────────────────────────────────
+const PROFILES = [
+    { name: 'Předem připravená výpověď',
+      fn: (kr) => score(kr, {opakovani:{min:1,w:2}, pretrzeni:{max:0.3,w:2},
+                               prazdna_slova:{max:0.5,w:1}, rozpad_syntaxe:{max:0.5,w:1}}) },
+    { name: 'Spontánní projev',
+      fn: (kr) => score(kr, {prazdna_slova:{min:1.5,w:2}, rozpad_syntaxe:{min:1,w:1.5},
+                               pretrzeni:{min:0.8,w:1.5}, opakovani:{max:0.8,w:1}}) },
+    { name: 'Vyhýbání se odpovědnosti',
+      fn: (kr) => score(kr, {pretrzeni:{min:1,w:2}, opakovani:{min:1.5,w:2},
+                               zamena_roli:{min:0.5,w:2}, posun_kontextu:{min:0.8,w:1.5}}) },
+    { name: 'Emoční přetlak',
+      fn: (kr) => score(kr, {emocni_zlom:{min:0.5,w:2.5}, opakovani:{min:1,w:1.5},
+                               prazdna_slova:{min:1,w:1}, rozpad_syntaxe:{min:0.8,w:1}}) },
+    { name: 'Nestabilní perspektiva',
+      fn: (kr) => score(kr, {zamena_roli:{min:0.5,w:2.5}, preskok:{min:0.8,w:2},
+                               posun_kontextu:{min:0.8,w:1.5}}) },
+    { name: 'Zaseknutí (fixace)',
+      fn: (kr) => score(kr, {fixace:{min:2,w:3}, opakovani:{min:2,w:2}}) },
+];
+
+function score(kr, criteria) {
+    let tot = 0, sat = 0;
+    Object.entries(criteria).forEach(([id, cfg]) => {
+        const v = kr[id]?.per100 || 0;
+        tot += cfg.w;
+        if((cfg.min !== undefined && v >= cfg.min) ||
+           (cfg.max !== undefined && v <= cfg.max)) sat += cfg.w;
+    });
+    return tot > 0 ? sat / tot : 0;
+}
+
+// ── CORE FUNCTIONS ──────────────────────────────────────────────
+function splitSent(text) {
+    return text.split(/(?<=[.!?…])\s+/).map(s => s.trim()).filter(s => s.length > 2);
+}
+
+function tokenize(text) {
+    return text.toLowerCase()
+               .replace(/[.,!?;:()"„"']/g, ' ')
+               .split(/\s+/)
+               .filter(w => w.length > 1);
+}
+
+function analyzeKeys(text) {
+    const s = splitSent(text);
+    const w = tokenize(text);
+    const res = {};
+    KEYS.forEach(k => {
+        const raw = k.detect(text, s, w);
+        res[k.id] = {
+            name: k.name,
+            raw,
+            per100: (raw / Math.max(w.length, 1)) * 100
+        };
+    });
+    return res;
+}
+
+function activeProfiles(kr) {
+    return PROFILES.filter(p => p.fn(kr) >= 0.6).map(p => p.name);
+}
+
+// Structural fingerprint
+function fingerprint(text) {
+    const s = splitSent(text);
+    const w = tokenize(text);
+    if(!s.length || !w.length) return null;
+
+    const lens = s.map(x => x.split(/\s+/).length);
+    const avgLen = lens.reduce((a,b) => a+b, 0) / lens.length;
+    const stdLen = Math.sqrt(lens.map(l => (l-avgLen)**2).reduce((a,b) => a+b, 0) / lens.length);
+
+    const timeW = ['včera','dnes','zítra','teď','potom','předtím','pak','nakonec','mezitím'];
+    const iW    = ['já','jsem','mě','mi','mám','chci','budu'];
+    const fillW = ['prostě','vlastně','jakože','jakoby','no','jako'];
+
+    const count = (list) => w.filter(x => list.includes(x)).length;
+
+    return {
+        sentences:    s.length,
+        words:        w.length,
+        avgSentLen:   +avgLen.toFixed(1),
+        stdSentLen:   +stdLen.toFixed(1),
+        timeRatio:    +((count(timeW) / w.length) * 100).toFixed(1),
+        firstPerson:  +((count(iW) / w.length) * 100).toFixed(1),
+        fillRatio:    +((count(fillW) / w.length) * 100).toFixed(1),
+        punctDensity: +((text.match(/[,;:—…]/g)||[]).length / w.length * 100).toFixed(1),
+    };
+}
+
+// Phrase matching — 5+ word sequences
+function findPhrases(textA, textB, minLen = 5) {
+    const wA = tokenize(textA);
+    const wB = tokenize(textB);
+    const found = [];
+    const usedA = new Set();
+    const usedB = new Set();
+
+    for(let i = 0; i <= wA.length - minLen; i++) {
+        if(usedA.has(i)) continue;
+        let best = null;
+        for(let j = 0; j <= wB.length - minLen; j++) {
+            if(usedB.has(j)) continue;
+            let len = 0;
+            while(i+len < wA.length && j+len < wB.length &&
+                  wA[i+len] === wB[j+len]) len++;
+            if(len >= minLen) {
+                if(!best || len > best.len) best = { i, j, len };
+            }
+        }
+        if(best) {
+            found.push({
+                phrase: wA.slice(best.i, best.i + best.len).join(' '),
+                posA: best.i,
+                posB: best.j,
+                len: best.len
+            });
+            for(let k = 0; k < best.len; k++) {
+                usedA.add(best.i + k);
+                usedB.add(best.j + k);
+            }
+        }
+    }
+    return found.sort((a,b) => b.len - a.len);
+}
+
+// ── RENDER ──────────────────────────────────────────────────────
+function run() {
+    const tA = document.getElementById('textA').value.trim();
+    const tB = document.getElementById('textB').value.trim();
+    if(!tA || !tB) { alert('Vyplňte oba texty.'); return; }
+
+    const fpA = fingerprint(tA), fpB = fingerprint(tB);
+    const krA = analyzeKeys(tA), krB = analyzeKeys(tB);
+    const profA = activeProfiles(krA), profB = activeProfiles(krB);
+    const phrases = findPhrases(tA, tB, 5);
+    const sA = splitSent(tA), sB = splitSent(tB);
+
+    // Stats
+    const sharedProf = profA.filter(p => profB.includes(p));
+    document.getElementById('statsGrid').innerHTML = [
+        { num: fpA?.words || 0,       lbl: 'Slov A' },
+        { num: fpB?.words || 0,       lbl: 'Slov B' },
+        { num: fpA?.sentences || 0,   lbl: 'Vět A' },
+        { num: fpB?.sentences || 0,   lbl: 'Vět B' },
+        { num: phrases.length,        lbl: 'Frázových shod', alert: phrases.length > 0 },
+        { num: sharedProf.length,     lbl: 'Sdílených profilů', alert: sharedProf.length > 0 },
+    ].map(s => `<div class="stat-box ${s.alert ? 'alert' : ''}">
+        <div class="num">${s.num}</div>
+        <div class="lbl">${s.lbl}</div>
+    </div>`).join('');
+
+    // Phrases
+    const pEl = document.getElementById('phraseResults');
+    if(!phrases.length) {
+        pEl.innerHTML = '<p style="color:var(--text-dim);font-size:0.82rem">Žádné frázové shody délky 5+ slov.</p>';
+    } else {
+        pEl.innerHTML = '<div class="phrase-list">' +
+            phrases.map(p => `
+                <div class="phrase-item ${p.len >= 8 ? 'strong' : ''}">
+                    „${p.phrase}"
+                    <span class="phrase-len">${p.len} slov</span>
+                </div>`).join('') +
+            '</div>';
+    }
+
+    // Structure
+    const STRUCT_LABELS = {
+        sentences:    'Počet vět',
+        words:        'Počet slov',
+        avgSentLen:   'Průměrná délka věty (sl.)',
+        stdSentLen:   'Odchylka délky vět',
+        timeRatio:    'Časové markery (%)',
+        firstPerson:  'Osobní zájmena 1. os. (%)',
+        fillRatio:    'Výplňová slova (%)',
+        punctDensity: 'Hustota interpunkce (%)',
+    };
+    const sgEl = document.getElementById('structGrid');
+    const mkCard = (title, fp, fp2) => {
+        if(!fp) return '';
+        return `<div class="struct-card">
+            <h3>${title}</h3>
+            ${Object.entries(STRUCT_LABELS).map(([k, lbl]) => {
+                const v = fp[k], v2 = fp2 ? fp2[k] : null;
+                const diff = v2 !== null && Math.abs(v - v2) > (typeof v === 'number' && v > 5 ? v * 0.3 : 1.5);
+                return `<div class="struct-row">
+                    <span class="struct-label">${lbl}</span>
+                    <span class="struct-val ${diff ? 'struct-diff' : ''}">${v}</span>
+                </div>`;
+            }).join('')}
+        </div>`;
+    };
+    sgEl.innerHTML = mkCard('Text A', fpA, fpB) + mkCard('Text B', fpB, fpA);
+
+    // Keys table
+    const krEl = document.getElementById('keyResults');
+    krEl.innerHTML = `<table class="key-table">
+        <tr><th>Klíč</th><th>Text A (abs.)</th><th>Text B (abs.)</th><th>Rozdíl</th></tr>
+        ${KEYS.map(k => {
+            const a = krA[k.id].raw, b = krB[k.id].raw;
+            const diff = Math.abs(a - b);
+            const cls = (a > 0 && b > 0) ? 'converge' : (a > 0 || b > 0 && diff > 1) ? 'diverge' : '';
+            return `<tr class="${cls}">
+                <td>${k.name}</td>
+                <td>${a}</td>
+                <td>${b}</td>
+                <td>${diff > 0 ? '±' + diff : '—'}</td>
+            </tr>`;
+        }).join('')}
+    </table>`;
+
+    // Profiles
+    const prEl = document.getElementById('profileResults');
+    prEl.innerHTML = PROFILES.map(p => {
+        const inA = profA.includes(p.name);
+        const inB = profB.includes(p.name);
+        let badge;
+        if(inA && inB)       badge = `<span class="badge badge-both">A + B</span>`;
+        else if(inA)         badge = `<span class="badge badge-a">A</span>`;
+        else if(inB)         badge = `<span class="badge badge-b">B</span>`;
+        else                 badge = `<span class="badge badge-none">—</span>`;
+        return `<div class="profile-row">
+            <span class="profile-name">${p.name}</span>
+            ${badge}
+        </div>`;
+    }).join('');
+
+    // Sentence table
+    const maxLen = Math.max(sA.length, sB.length);
+    let tbl = `<table class="sent-table">
+        <tr><th>#</th><th>Text A</th><th>Text B</th></tr>`;
+    for(let i = 0; i < maxLen; i++) {
+        const a = sA[i] || '', b = sB[i] || '';
+        const cls = !a ? 'only-b' : !b ? 'only-a' : '';
+        tbl += `<tr class="${cls}">
+            <td>${i+1}</td>
+            <td>${esc(a) || '—'}</td>
+            <td>${esc(b) || '—'}</td>
+        </tr>`;
+    }
+    tbl += '</table>';
+    document.getElementById('sentTable').innerHTML = tbl;
+
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+}
+
+function clear_() {
+    document.getElementById('textA').value = '';
+    document.getElementById('textB').value = '';
+    document.getElementById('results').style.display = 'none';
+}
+
+function esc(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+</script>
+</body>
+</html>
